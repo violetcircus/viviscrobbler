@@ -8,6 +8,16 @@ import (
 	"strings"
 )
 
+type scrobble struct {
+	track_info string
+	status string
+	timestamp string
+	api_key string
+	sk string
+	api_secret string
+	method string
+}
+
 func main() {
 	fmt.Println("viviscrobbler!")
 	conn, err := net.Dial("tcp", "localhost:6600")
@@ -29,6 +39,7 @@ func main() {
 
 	fmt.Fprintf(conn, "currentsong\n")
 
+	track_info := make(map[string]string)
 	for {
 		line, err := reader.ReadString('\n')
 		if err != nil {
@@ -39,6 +50,11 @@ func main() {
 			fmt.Println("Response:", line)
 			break
 		}
-		fmt.Println("status:", line)
+		fmt.Println(line)
+		key, value, found := strings.Cut(line, ":")
+		if found {
+			track_info[key] = value
+		}
 	} 
+	fmt.Println(track_info["Last-Modified"])
 }
