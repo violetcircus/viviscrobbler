@@ -1,4 +1,4 @@
-package viviscrobbler
+package main
 
 import (
 	"fmt"
