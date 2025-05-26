@@ -34,27 +34,31 @@ func main() {
 		log.Fatal(err)
 	}
 
-	//print the output
+	// print the output
 	fmt.Println("Server:", line)
 
 	fmt.Fprintf(conn, "currentsong\n")
 
+	// create track info map
 	track_info := make(map[string]string)
+	// loop over lines returned by http request
 	for {
 		line, err := reader.ReadString('\n')
 		if err != nil {
 			log.Fatal(err)
 		}
 		line = strings.TrimSpace(line)
+		// check if response finished, stop if it has
 		if line == "OK" || strings.HasPrefix(line, "ACK") {
 			fmt.Println("Response:", line)
 			break
 		}
+		// output results to terminal
 		fmt.Println(line)
+		// put results in the map
 		key, value, found := strings.Cut(line, ":")
 		if found {
 			track_info[key] = value
 		}
 	} 
-	fmt.Println(track_info["Last-Modified"])
 }
