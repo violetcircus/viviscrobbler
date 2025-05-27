@@ -11,6 +11,7 @@ func GetArtist(track_info map[string]string) string {
 	log.SetFlags(0)
 
 	//check if artist field starts with album artist, overwrite if it does
+	//this takes care of edge cases that can't be solved with regex.
 	if strings.HasPrefix(artist, album_artist) {
 		artist = album_artist
 	} else {
