@@ -1,11 +1,14 @@
 package internal
+
 // this file solves the Main Problem i created this program to solve: submitting only the first artist in the metadata field
 // to last.fm when provided with metadata in the form of a string separated by any number of arbitrary separators.
 // this project began literally on day 1 of me learning go
 
 import (
-	"strings"
+	"fmt"
 	"log"
+	"regexp"
+	"strings"
 )
 
 type Result struct {
@@ -45,10 +48,43 @@ func GetArtist(trackInfo map[string]string) string {
 	}
 }
 
+// parse result for artist info
 func CheckMetadata(trackInfo map[string]string) string {
-	// parse result for artist info
 	artist := trackInfo["Artist"]
+
+	// split artist up across each separator then loop through them, popping the end off each time until a valid artist is found.
+	artists := splitArtists(artist)
+	for i := range artists {
+		field := strings.Join(artists[:len(artists)-i], "")
+		fmt.Println("field:", field)
+	}
 	return artist
+}
+
+func splitArtists(input string) []string {
+	// Define a case-insensitive regex pattern for separators
+	re := regexp.MustCompile(`(?i)\s*(,|;|&|feat\.|ft\.|featuring|and|\/)\s*`)
+
+	// Split parts and find separators
+	parts := re.Split(input, -1)
+	separators := re.FindAllString(input, -1)
+
+	// Build combined result
+	var result []string
+	for i, part := range parts {
+		trimmedPart := strings.TrimSpace(part)
+		if trimmedPart != "" {
+			result = append(result, trimmedPart)
+		}
+
+		if i < len(separators) {
+			sep := fmt.Sprintf("%v ", strings.TrimSpace(separators[i])) // capture group for the separator itself
+			if sep != "" {
+				result = append(result, sep)
+			}
+		}
+	}
+	return result
 }
 
 func SeparateArtists(artist string) string {
@@ -56,7 +92,7 @@ func SeparateArtists(artist string) string {
 	//replace with regex??
 	log.Print(artist)
 	separators := []string{
-		"feat.","Featuring","featuring"," x ",",",";","/","&",
+		"feat.","Featuring","featuring"," x ",",",";","/","&","and",
 	}
 	// slice containing attempts to find 1st artist name
 	attempts := []string{}
