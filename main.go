@@ -28,9 +28,12 @@ func main() {
 	}
 	defer conn.Close()
 	track_info := GetSong(conn)
-	fmt.Println("Artist:", internal.GetArtist(track_info["Artist"]))
-	var config = internal.ReadConfig()
-	fmt.Println(config.SingleArtist)
+
+	fmt.Println("Artist:", internal.GetArtist(track_info))
+
+	// redo this to use yaml
+	// var config = internal.ReadConfig()
+	// fmt.Println(config.SingleArtist)
 }
 
 func GetSong (conn net.Conn) map[string]string {

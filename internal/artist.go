@@ -5,12 +5,30 @@ import (
 	"log"
 )
 
-func GetArtist(artist string) string {
+func GetArtist(track_info map[string]string) string {
+	artist := track_info["Artist"]
+	album_artist := track_info["AlbumArtist"]
 	log.SetFlags(0)
-	separators := []string{
-		",",";","/","&","feat.","Featuring","featuring",
+
+	//check if artist field starts with album artist, overwrite if it does
+	if strings.HasPrefix(artist, album_artist) {
+		artist = album_artist
+	} else {
+		return SeparateArtists(artist)
 	}
-	attempts:= []string{}
+	return artist
+}
+
+func SeparateArtists(artist string) string {
+	// list of artist separators to check for. could get from config file.
+	//replace with regex??
+	separators := []string {
+		","," x ",";","/","&","feat.","Featuring","featuring",
+	}
+	// slice containing attempts to find 1st artist name
+	attempts := []string{}
+
+	// loop over the separators checking if any show up in the artist string
 	for _, separator := range separators {
 		artist, _, found := strings.Cut(artist, separator)
 		if found {
@@ -24,8 +42,10 @@ func GetArtist(artist string) string {
 	return AttemptEval(attempts)
 }
 
+// pick one of the various attempts to move forward with
 func AttemptEval(attempts []string) string {
-	match := attempts[0]
+	log.Print(attempts)
+	match := strings.TrimSpace(attempts[0])
 
 	return match
 }
