@@ -31,7 +31,7 @@ func GetArtist(trackInfo map[string]string) string {
 		if config.SanityCheck == true {
 			// if yes, run it. 
 			// step 1: check if first artist == albumArtist. easy
-			if strings.HasPrefix(artist, albumArtist) {
+			if strings.HasPrefix(artist, albumArtist) && len(albumArtist) > 0 {
 				return albumArtist
 			} else if config.ApiCheck == true { 
 				// here we do the opt-out api-based check as a second-to-last resort
@@ -55,13 +55,17 @@ func CheckMetadata(trackInfo map[string]string) string {
 	// split artist up across each separator then loop through them, popping the end off each time until a valid artist is found.
 	artists := splitArtists(artist)
 	for i := range artists {
-		field := strings.Join(artists[:len(artists)-i], "")
-		fmt.Println("field:", field)
+		name := strings.Join(artists[:len(artists)-i], "")
+		fmt.Println("name:", name)
+		if SendQuery(name) != "Not an artist" {
+			return name
+		}
 	}
-	return artist
+	return "failed to find artist"
 }
 
 func splitArtists(input string) []string {
+	log.Print("splitting artists")
 	// Define a case-insensitive regex pattern for separators
 	re := regexp.MustCompile(`(?i)\s*(,|;|&|feat\.|ft\.|featuring|and|\/)\s*`)
 

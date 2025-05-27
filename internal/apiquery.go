@@ -31,15 +31,16 @@ func SendQuery(artist string) string {
 	finalUrl := fmt.Sprintf("https://musicbrainz.org/ws/2/artist/?%s", params.Encode())
 
 	// send get request to URL
+	// error handling needs to fall back to other methods of checking metadata later
 	resp, err := http.Get(finalUrl)
 	if err != nil {
-		fmt.Println("whoops. fucked up on the get")
+		fmt.Println("whoops. messed up on the get")
 		log.Fatal(err)
 	}
 	// convert response into string
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("whoops. fucked up on the io.readall")
+		fmt.Println("whoops. messed up on the io.readall")
 		log.Fatal(err)
 	}
 
