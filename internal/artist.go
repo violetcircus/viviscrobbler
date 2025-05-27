@@ -12,15 +12,20 @@ func GetArtist(artist string) string {
 	}
 	attempts:= []string{}
 	for _, separator := range separators {
-		artist, features, found := strings.Cut(artist, separator)
-		if !found {
-			log.Print("no separator found!!")
+		artist, _, found := strings.Cut(artist, separator)
+		if found {
+			attempts = append(attempts, artist)
+			// log.Print(separator)
+			// log.Print("artist", artist)
+			// log.Print("features", features)
 		}
-
-		attempts = append(attempts, artist)
-		log.Print(separator)
-		log.Print("artist", artist)
-		log.Print("features", features)
+		// log.Print("no separator found!!")
 	}
-	return artist
+	return AttemptEval(attempts)
+}
+
+func AttemptEval(attempts []string) string {
+	match := attempts[0]
+
+	return match
 }
