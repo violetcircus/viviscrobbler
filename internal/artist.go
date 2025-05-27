@@ -4,8 +4,6 @@ package internal
 // this project began literally on day 1 of me learning go
 
 import (
-	"net/http"
-	"net/url"
 	"strings"
 	"log"
 )
@@ -20,6 +18,8 @@ func GetArtist(trackInfo map[string]string) string {
 	log.SetFlags(0)
 	config := ReadConfig()
 
+	// this code is dumb. make it nicer later
+
 	// if user opted out of first-artist scrobble, leave metadata as is
 	if config.SingleArtist == false {
 		return artist
@@ -31,7 +31,7 @@ func GetArtist(trackInfo map[string]string) string {
 			if strings.HasPrefix(artist, albumArtist) {
 				return albumArtist
 			} else if config.ApiCheck == true { 
-				// here we do the opt-out api-based check 
+				// here we do the opt-out api-based check as a second-to-last resort
 				return CheckMetadata(trackInfo)
 			} else {
 				// if all else fails, run back to regex
@@ -46,18 +46,6 @@ func GetArtist(trackInfo map[string]string) string {
 }
 
 func CheckMetadata(trackInfo map[string]string) string {
-	// conn, err := net.Dial("tcp", "https://musicbrainz.org/ws/2/")
-	// if err != nil {
-	// 	log.Fatal(err) // for now - in future this will just jump over to SeparateArtists()
-	// }
-	// defer conn.Close()
-	// okay i need to figure out how im doing this now lol
-
-	baseUrl := "https://musicbrainz.org/ws/2/"
-	// construct appropriate URL using track info
-
-	// send get request 
-
 	// parse result for artist info
 	artist := trackInfo["Artist"]
 	return artist
