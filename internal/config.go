@@ -2,7 +2,7 @@ package internal
 
 import (
 	"log"
-	"github.com/BurntSushi/toml"
+	"github.com/BurntSushi/toml" // switch to yaml! need better key:value support
 	"os"
 )
 
