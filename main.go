@@ -10,12 +10,12 @@ import (
 )
 
 type scrobble struct {
-	track_info string
+	trackInfo string
 	status string
 	timestamp string
-	api_key string
+	apiKey string
 	sk string
-	api_secret string
+	apiSecret string
 	method string
 }
 
@@ -27,9 +27,9 @@ func main() {
 		log.Fatal(err)
 	}
 	defer conn.Close()
-	track_info := GetSong(conn)
+	trackInfo := GetSong(conn)
 
-	fmt.Println("Artist:", internal.GetArtist(track_info))
+	fmt.Println("Artist:", internal.GetArtist(trackInfo))
 
 	// redo this to use yaml
 	// var config = internal.ReadConfig()
@@ -52,7 +52,7 @@ func GetSong (conn net.Conn) map[string]string {
 	fmt.Fprintf(conn, "currentsong\n")
 
 	// create track info map
-	track_info := make(map[string]string)
+	trackInfo := make(map[string]string)
 	// loop over lines returned by http request
 	for {
 		line, err := reader.ReadString('\n')
@@ -70,8 +70,8 @@ func GetSong (conn net.Conn) map[string]string {
 		// put results in the map
 		key, value, found := strings.Cut(line, ":")
 		if found {
-			track_info[key] = value
+			trackInfo[key] = value
 		}
 	} 
-	return track_info
+	return trackInfo
 }

@@ -3,12 +3,15 @@ package internal
 import (
 	"log"
 	"github.com/BurntSushi/toml" // switch to yaml! need better key:value support
+	// "gopkg.in/yaml.v3" // use this prob  
 	"os"
 )
 
 type Config struct {
 	Service string
 	SingleArtist bool
+	SanityCheck bool
+	Regex string
 }
 
 func ReadConfig() Config {
