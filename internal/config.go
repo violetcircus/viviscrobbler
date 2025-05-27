@@ -11,6 +11,7 @@ type Config struct {
 	Service string
 	SingleArtist bool
 	SanityCheck bool
+	ApiCheck bool
 	Regex string
 }
 

@@ -16,7 +16,7 @@ type Result struct {
 
 func GetArtist(trackInfo map[string]string) string {
 	artist := trackInfo["Artist"]
-	// albumArtist := trackInfo["AlbumArtist"]
+	albumArtist := trackInfo["AlbumArtist"]
 	log.SetFlags(0)
 	config := ReadConfig()
 
@@ -24,10 +24,19 @@ func GetArtist(trackInfo map[string]string) string {
 	if config.SingleArtist == false {
 		return artist
 	} else {
-		// here we check if they want the online metadata sanity check
+		// here we check if they want the metadata sanity check
 		if config.SanityCheck == true {
 			// if yes, run it. 
-			return CheckMetadata(trackInfo)
+			// step 1: check if first artist == albumArtist. easy
+			if strings.HasPrefix(artist, albumArtist) {
+				return albumArtist
+			} else if config.ApiCheck == true { 
+				// here we do the opt-out api-based check 
+				return CheckMetadata(trackInfo)
+			} else {
+				// if all else fails, run back to regex
+				return SeparateArtists(artist)
+			}
 		} else {
 			// if not, fall back regex-based cutting and allow the user to provide
 			// a custom regex string in the config file
