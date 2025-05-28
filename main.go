@@ -42,18 +42,18 @@ func main() {
 				break
 			}
 		}
-
-		trackInfo := GetSong(conn, reader)
-
-		log.Println(internal.GetArtist(trackInfo))
+		// ask for current song
+		fmt.Fprintf(conn, "currentsong\n")
+		trackInfo := mapOutput(reader)
+		fmt.Fprintf(conn, "status\n")
+		status := mapOutput(reader)
+		log.Println(status)
+		log.Println("Cleaned artist:", internal.GetArtist(trackInfo))
 	}
 }
 
 
-func GetSong (conn net.Conn, reader *bufio.Reader) map[string]string {
-	// ask for current song
-	fmt.Fprintf(conn, "currentsong\n")
-
+func mapOutput (reader *bufio.Reader) map[string]string {
 	line, err := reader.ReadString('\n')
 	if err != nil {
 		log.Fatal(err)
