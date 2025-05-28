@@ -32,7 +32,7 @@ func GetArtist(trackInfo map[string]string) string {
 			// if yes, run it. 
 			// step 1: check if first artist == albumArtist. easy
 			if strings.HasPrefix(artist, albumArtist) && len(albumArtist) > 0 {
-				return albumArtist
+				return strings.TrimSpace(albumArtist)
 			} else if config.ApiCheck == true { 
 				// here we do the opt-out api-based check as a second-to-last resort
 				return CheckMetadata(trackInfo)
@@ -56,16 +56,17 @@ func CheckMetadata(trackInfo map[string]string) string {
 	artists := splitArtists(artist)
 	for i := range artists {
 		name := strings.Join(artists[:len(artists)-i], "")
-		fmt.Println("name:", name)
+		// fmt.Println("name:", name)
 		if SendQuery(name) != "Not an artist" {
-			return name
+			// log.Printf("hi its working")
+			return strings.TrimSpace(name)
 		}
 	}
 	return "failed to find artist"
 }
 
 func splitArtists(input string) []string {
-	log.Print("splitting artists")
+	// log.Print("splitting artists")
 	// Define a case-insensitive regex pattern for separators
 	re := regexp.MustCompile(`(?i)\s*(,|;|&|feat\.|ft\.|featuring|and|\/)\s*`)
 
@@ -94,7 +95,7 @@ func splitArtists(input string) []string {
 func SeparateArtists(artist string) string {
 	// list of artist separators to check for. could get from config file.
 	//replace with regex??
-	log.Print(artist)
+	// log.Print(artist)
 	separators := []string{
 		"feat.","Featuring","featuring"," x ",",",";","/","&","and",
 	}
@@ -106,7 +107,7 @@ func SeparateArtists(artist string) string {
 		artist, _, found := strings.Cut(artist, separator)
 		if found {
 			attempts = append(attempts, artist)
-			log.Print(separator)
+			// log.Print(separator)
 			// log.Print("artist", artist)
 		} else {
 			log.Print("no separator found!!")
@@ -117,7 +118,7 @@ func SeparateArtists(artist string) string {
 
 // pick one of the various attempts to move forward with - this is a stub and also a placeholder
 func AttemptEval(attempts []string) string {
-	log.Print(attempts)
+	// log.Print(attempts)
 	match := strings.TrimSpace(attempts[0])
 
 	return match

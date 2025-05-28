@@ -27,33 +27,44 @@ func main() {
 		log.Fatal(err)
 	}
 	defer conn.Close()
-	trackInfo := GetSong(conn)
-
-	fmt.Println("Artist:", internal.GetArtist(trackInfo))
-
-	// redo this to use yaml
-	// var config = internal.ReadConfig()
-	// fmt.Println(config.SingleArtist)
-}
-
-func GetSong (conn net.Conn) map[string]string {
-	// create bufio reader that reads what comes from the connection
 	reader := bufio.NewReader(conn)
 
-	// read each new line
+	for {
+		// tell mpd we're idling
+		fmt.Fprintln(conn, "idle player") 
+		for {
+			line, err := reader.ReadString('\n')
+			if err != nil {
+				log.Println("yurp we died")
+				log.Fatal(err)
+			}
+			if strings.HasPrefix(line, "changed: player") {
+				break
+			}
+		}
+
+		trackInfo := GetSong(conn, reader)
+
+		log.Println(internal.GetArtist(trackInfo))
+	}
+}
+
+
+func GetSong (conn net.Conn, reader *bufio.Reader) map[string]string {
+	// ask for current song
+	fmt.Fprintf(conn, "currentsong\n")
+
 	line, err := reader.ReadString('\n')
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// print the output
+	// print the status
 	fmt.Println("Server:", line)
-
-	fmt.Fprintf(conn, "currentsong\n")
 
 	// create track info map
 	trackInfo := make(map[string]string)
-	// loop over lines returned by http request
+	// loop over song info
 	for {
 		line, err := reader.ReadString('\n')
 		if err != nil {

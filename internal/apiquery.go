@@ -55,12 +55,12 @@ func SendQuery(artist string) string {
 	if len(artists) > limit{
 		artists = artists[:limit]
 	}
-	// make that into a json object
-	prettyJSON, err := json.MarshalIndent(artists, "", " ")
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Print(string(prettyJSON))
+	// make that into a json object for debugging
+	// prettyJSON, err := json.MarshalIndent(artists, "", " ")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// log.Print(string(prettyJSON))
 
 	// search artists for the artist name
 	found := false 

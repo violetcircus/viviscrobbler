@@ -2,8 +2,7 @@ package internal
 
 import (
 	"log"
-	"github.com/BurntSushi/toml" // switch to yaml! need better key:value support
-	// "gopkg.in/yaml.v3" // use this prob  
+	"github.com/BurntSushi/toml"
 	"os"
 )
 
