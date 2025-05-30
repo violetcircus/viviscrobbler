@@ -18,7 +18,6 @@ type Result struct {
 func GetArtist(trackInfo map[string]string) string {
 	artist := trackInfo["Artist"]
 	albumArtist := trackInfo["AlbumArtist"]
-	log.SetFlags(0)
 	config := ReadConfig()
 
 	// this code is dumb. make it nicer later
