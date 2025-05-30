@@ -1,22 +1,22 @@
 package main
 
 import (
-	"fmt"
 	"bufio"
+	"fmt"
+	"github.com/violetcircus/viviscrobbler/internal"
 	"log"
 	"net"
 	"strings"
-	"github.com/violetcircus/viviscrobbler/internal"
 )
 
 type scrobble struct {
 	trackInfo string
-	status string
+	status    string
 	timestamp string
-	apiKey string
-	sk string
+	apiKey    string
+	sk        string
 	apiSecret string
-	method string
+	method    string
 }
 
 func main() {
@@ -31,7 +31,7 @@ func main() {
 
 	for {
 		// tell mpd we're idling
-		fmt.Fprintln(conn, "idle player") 
+		fmt.Fprintln(conn, "idle player")
 		for {
 			line, err := reader.ReadString('\n')
 			if err != nil {
@@ -52,8 +52,7 @@ func main() {
 	}
 }
 
-
-func mapOutput (reader *bufio.Reader) map[string]string {
+func mapOutput(reader *bufio.Reader) map[string]string {
 	line, err := reader.ReadString('\n')
 	if err != nil {
 		log.Fatal(err)
@@ -83,6 +82,6 @@ func mapOutput (reader *bufio.Reader) map[string]string {
 		if found {
 			trackInfo[key] = value
 		}
-	} 
+	}
 	return trackInfo
 }

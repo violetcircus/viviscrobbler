@@ -1,24 +1,24 @@
 package internal
 
 import (
-	"io"
-	"net/url"
-	"net/http"
 	"encoding/json"
-	"log"
 	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"net/url"
 	"strings"
 )
 
 type Artist struct {
-	ID string `json:"id"`
+	ID   string `json:"id"`
 	Name string `json:"name"`
 }
 
 type ArtistResponse struct {
 	Artists []Artist `json:"artists"`
-	Count int `json:"count"`
-	Offset int `json:"offset"`
+	Count   int      `json:"count"`
+	Offset  int      `json:"offset"`
 }
 
 func SendQuery(artist string) string {
@@ -52,7 +52,7 @@ func SendQuery(artist string) string {
 	// crop it down to 5 results
 	limit := 5
 	artists := result.Artists
-	if len(artists) > limit{
+	if len(artists) > limit {
 		artists = artists[:limit]
 	}
 	// make that into a json object for debugging
@@ -63,7 +63,7 @@ func SendQuery(artist string) string {
 	// log.Print(string(prettyJSON))
 
 	// search artists for the artist name
-	found := false 
+	found := false
 	target := artist
 	newArtist := ""
 	for _, artist := range artists {

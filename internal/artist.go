@@ -29,11 +29,11 @@ func GetArtist(trackInfo map[string]string) string {
 	} else {
 		// here we check if they want the metadata sanity check
 		if config.SanityCheck == true {
-			// if yes, run it. 
+			// if yes, run it.
 			// step 1: check if first artist == albumArtist. easy
 			if strings.HasPrefix(artist, albumArtist) && len(albumArtist) > 0 {
 				return strings.TrimSpace(albumArtist)
-			} else if config.ApiCheck == true { 
+			} else if config.ApiCheck == true {
 				// here we do the opt-out api-based check as a second-to-last resort
 				return CheckMetadata(trackInfo)
 			} else {
@@ -56,9 +56,7 @@ func CheckMetadata(trackInfo map[string]string) string {
 	artists := splitArtists(artist)
 	for i := range artists {
 		name := strings.Join(artists[:len(artists)-i], "")
-		// fmt.Println("name:", name)
 		if SendQuery(name) != "Not an artist" {
-			// log.Printf("hi its working")
 			return strings.TrimSpace(name)
 		}
 	}
@@ -97,7 +95,7 @@ func SeparateArtists(artist string) string {
 	//replace with regex??
 	// log.Print(artist)
 	separators := []string{
-		"feat.","Featuring","featuring"," x ",",",";","/","&","and",
+		"feat.", "Featuring", "featuring", " x ", ",", ";", "/", "&", "and",
 	}
 	// slice containing attempts to find 1st artist name
 	attempts := []string{}

@@ -1,23 +1,23 @@
 package internal
 
 import (
-	"log"
 	"github.com/BurntSushi/toml"
+	"log"
 	"os"
 )
 
 type Config struct {
-	Service string
+	Service      string
 	SingleArtist bool
-	SanityCheck bool
-	ApiCheck bool
-	Regex string
+	SanityCheck  bool
+	ApiCheck     bool
+	Regex        string
 }
 
 func ReadConfig() Config {
 	var configfile = "/home/violet/.config/vvscrob/config.toml"
 	_, err := os.Stat(configfile)
-	if err!= nil {
+	if err != nil {
 		log.Fatal("Config file is missing:", configfile)
 	}
 
