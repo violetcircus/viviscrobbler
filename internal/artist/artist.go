@@ -1,4 +1,4 @@
-package internal
+package artist
 
 // this file solves the Main Problem i created this program to solve: submitting only the first artist in the metadata field
 // to last.fm when provided with metadata in the form of a string separated by any number of arbitrary separators.
@@ -6,6 +6,7 @@ package internal
 
 import (
 	"fmt"
+	"github.com/violetcircus/viviscrobbler/internal/config"
 	"log"
 	"regexp"
 	"strings"
@@ -18,7 +19,7 @@ type Result struct {
 func GetArtist(trackInfo map[string]string) string {
 	artist := trackInfo["Artist"]
 	albumArtist := trackInfo["AlbumArtist"]
-	config := ReadConfig()
+	config := config.ReadConfig()
 
 	// this code is dumb. make it nicer later
 
