@@ -3,36 +3,16 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/violetcircus/viviscrobbler/internal/metadata"
-	"github.com/violetcircus/viviscrobbler/internal/setup"
 	"log"
 	"net"
-	// "reflect"
 	"strconv"
+
+	"github.com/violetcircus/viviscrobbler/internal/metadata"
+	"github.com/violetcircus/viviscrobbler/internal/setup"
+
+	// "strconv"
 	"strings"
 )
-
-// struct for status info reported by mpd
-type Status struct {
-	State      string
-	Duration   int
-	Elapsed    int
-	Time       string
-	Repeat     int
-	Single     int
-	Song       int
-	SongId     int
-	NextSong   int
-	NextSongID int
-}
-
-// struct for song info reported by mpd
-type TrackInfo struct {
-	Title       string
-	Album       string
-	AlbumArtist string
-	Artist      string
-}
 
 // struct for scrobbles
 type Scrobble struct {
@@ -80,7 +60,7 @@ func main() {
 		}
 		// get current song
 		fmt.Fprintf(conn, "currentsong\n")
-		trackInfo := getSong(reader)
+		trackInfo := mapOutput(reader)
 		// get status
 		fmt.Fprintf(conn, "status\n")
 		status := mapOutput(reader)
@@ -89,103 +69,19 @@ func main() {
 		// if the user has told mpd to play:
 		state := status["state"]
 		if state == "play" {
-			title := trackInfo.Title
+			title := trackInfo["Title"].(string)
 			if title != currentlyWatchedTrack { // check if current track != new track
 				currentlyWatchedTrack = title // set current track to new track
 				log.Println("state:", state)
 				log.Println("title:", title)
-				// log.Println("Cleaned artist:", metadata.GetArtist(trackInfo))
-				// } else if status["single"] == 1 && status["repeat"] == 1 && status["elapsed"] < 1 {
+				log.Println("Cleaned artist:", metadata.GetArtist(trackInfo))
+			} else if status["single"].(float64) == 1 && status["repeat"].(float64) == 1 && status["elapsed"].(int) < 1 {
 			}
 		}
 	}
 }
 
-// this could be optimised but im scared of mpd changing stuff around.
-func getSong(reader *bufio.Reader) *TrackInfo {
-	s := TrackInfo{}
-	for key, value := range mapOutput(reader) {
-		switch key {
-		case "Title":
-			s.Title = value
-		case "Album":
-			s.Album = value
-		case "Artist":
-			s.Artist = value
-		case "AlbumArtist":
-			s.AlbumArtist = value
-		}
-	}
-	return &s
-}
-
-func getStatus(reader *bufio.Reader) *Status {
-	s := Status{}
-	for key, value := range mapOutput(reader) {
-		switch key {
-		case "state":
-			s.State = value
-		case "repeat":
-			repeat, err := strconv.Atoi(value)
-			if err != nil {
-				log.Fatal(err)
-			}
-			s.Repeat = repeat
-		case "single":
-			single, err := strconv.Atoi(value)
-			if err != nil {
-				log.Fatal(err)
-			}
-			s.Single = single
-		case "duration":
-			duration, err := strconv.Atoi(value)
-			if err != nil {
-				log.Fatal(err)
-			}
-			s.Duration = duration
-		case "elapsed":
-			elapsed, err := strconv.Atoi(value)
-			if err != nil {
-				log.Fatal(err)
-			}
-			s.Elapsed = elapsed
-		case "Time":
-			time, err := strconv.Atoi(value)
-			if err != nil {
-				log.Fatal(err)
-			}
-			s.Time = time
-		case "Song":
-			song, err := strconv.Atoi(value)
-			if err != nil {
-				log.Fatal(err)
-			}
-			s.Song = song
-		case "Songid":
-			songid, err := strconv.Atoi(value)
-			if err != nil {
-				log.Fatal(err)
-			}
-			s.SongID = songid
-		case "Nextsong":
-			nextsong, err := strconv.Atoi(value)
-			if err != nil {
-				log.Fatal(err)
-			}
-			s.NextSong = nextsong
-		case "Nextsongid":
-			nextsongid, err := strconv.Atoi(value)
-		if err != nil {
-				log.Fatal(err)
-			}
-		s.NextSongID = nextsongid
-}
-		}
-	}
-	return &s
-}
-
-func mapOutput(reader *bufio.Reader) map[string]string {
+func mapOutput(reader *bufio.Reader) map[string]any {
 	line, err := reader.ReadString('\n')
 	if err != nil {
 		log.Fatal(err)
@@ -194,8 +90,8 @@ func mapOutput(reader *bufio.Reader) map[string]string {
 	// print the status
 	fmt.Println("Server:", line)
 
-	// create track info map
-	trackInfo := make(map[string]string)
+	// create output map
+	output := make(map[string]any)
 	// loop over song info
 	for {
 		line, err := reader.ReadString('\n')
@@ -213,8 +109,31 @@ func mapOutput(reader *bufio.Reader) map[string]string {
 		// put results in the map
 		key, value, found := strings.Cut(line, ":")
 		if found {
-			trackInfo[strings.TrimSpace(key)] = strings.TrimSpace(value)
+			// if the string is not purely numeric, stick it in the map as a string
+			if !isNumeric(strings.TrimSpace(value)) {
+				output[strings.TrimSpace(key)] = strings.TrimSpace(value)
+			} else {
+				// if it is, convert to a 64-bit float and stick it in the map
+				value, err := strconv.ParseFloat(value, 64)
+				if err != nil {
+					log.Fatal(err)
+				}
+				output[strings.TrimSpace(key)] = value
+			}
 		}
 	}
-	return trackInfo
+	return output
+}
+
+// quick helper function to check if a string is purely numeric
+func isNumeric(s string) bool {
+	if s == "" {
+		return false
+	}
+	for _, r := range s {
+		if r < '0' || r > '9' {
+			return false
+		}
+	}
+	return true
 }

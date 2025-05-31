@@ -16,9 +16,9 @@ type Result struct {
 	artist string
 }
 
-func GetArtist(trackInfo map[string]string) string {
-	artist := trackInfo["Artist"]
-	albumArtist := trackInfo["AlbumArtist"]
+func GetArtist(trackInfo map[string]any) string {
+	artist := trackInfo["Artist"].(string)
+	albumArtist := trackInfo["AlbumArtist"].(string)
 	config := config.ReadConfig()
 
 	// this code is dumb. make it nicer later
@@ -35,7 +35,7 @@ func GetArtist(trackInfo map[string]string) string {
 				return strings.TrimSpace(albumArtist)
 			} else if config.ApiCheck == true {
 				// here we do the opt-out api-based check as a second-to-last resort
-				return CheckMetadata(trackInfo)
+				return CheckMetadata(artist)
 			} else {
 				// if all else fails, run back to regex
 				return SeparateArtists(artist)
@@ -49,9 +49,7 @@ func GetArtist(trackInfo map[string]string) string {
 }
 
 // parse result for artist info
-func CheckMetadata(trackInfo map[string]string) string {
-	artist := trackInfo["Artist"]
-
+func CheckMetadata(artist string) string {
 	// split artist up across each separator then loop through them, popping the end off each time until a valid artist is found.
 	artists := splitArtists(artist)
 	for i := range artists {
