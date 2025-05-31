@@ -21,9 +21,9 @@ type Status struct {
 	Repeat     int
 	Single     int
 	Song       int
-	Songid     int
-	Nextsong   int
-	Nextsongid int
+	SongId     int
+	NextSong   int
+	NextSongID int
 }
 
 // struct for song info reported by mpd
@@ -137,6 +137,49 @@ func getStatus(reader *bufio.Reader) *Status {
 				log.Fatal(err)
 			}
 			s.Single = single
+		case "duration":
+			duration, err := strconv.Atoi(value)
+			if err != nil {
+				log.Fatal(err)
+			}
+			s.Duration = duration
+		case "elapsed":
+			elapsed, err := strconv.Atoi(value)
+			if err != nil {
+				log.Fatal(err)
+			}
+			s.Elapsed = elapsed
+		case "Time":
+			time, err := strconv.Atoi(value)
+			if err != nil {
+				log.Fatal(err)
+			}
+			s.Time = time
+		case "Song":
+			song, err := strconv.Atoi(value)
+			if err != nil {
+				log.Fatal(err)
+			}
+			s.Song = song
+		case "Songid":
+			songid, err := strconv.Atoi(value)
+			if err != nil {
+				log.Fatal(err)
+			}
+			s.SongID = songid
+		case "Nextsong":
+			nextsong, err := strconv.Atoi(value)
+			if err != nil {
+				log.Fatal(err)
+			}
+			s.NextSong = nextsong
+		case "Nextsongid":
+			nextsongid, err := strconv.Atoi(value)
+		if err != nil {
+				log.Fatal(err)
+			}
+		s.NextSongID = nextsongid
+}
 		}
 	}
 	return &s
