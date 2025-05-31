@@ -1,4 +1,4 @@
-package artist
+package metadata
 
 import (
 	"encoding/json"

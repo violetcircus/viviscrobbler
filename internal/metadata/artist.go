@@ -1,4 +1,4 @@
-package artist
+package metadata
 
 // this file solves the Main Problem i created this program to solve: submitting only the first artist in the metadata field
 // to last.fm when provided with metadata in the form of a string separated by any number of arbitrary separators.

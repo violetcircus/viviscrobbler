@@ -3,11 +3,11 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/violetcircus/viviscrobbler/internal/artist"
+	"github.com/violetcircus/viviscrobbler/internal/metadata"
 	"github.com/violetcircus/viviscrobbler/internal/setup"
 	"log"
 	"net"
-	"reflect"
+	// "reflect"
 	"strconv"
 	"strings"
 )
@@ -80,7 +80,7 @@ func main() {
 		}
 		// get current song
 		fmt.Fprintf(conn, "currentsong\n")
-		trackInfo := mapOutput(reader)
+		trackInfo := getSong(reader)
 		// get status
 		fmt.Fprintf(conn, "status\n")
 		status := mapOutput(reader)
@@ -89,12 +89,12 @@ func main() {
 		// if the user has told mpd to play:
 		state := status["state"]
 		if state == "play" {
-			title := trackInfo["Title"]         // get title
+			title := trackInfo.Title
 			if title != currentlyWatchedTrack { // check if current track != new track
 				currentlyWatchedTrack = title // set current track to new track
 				log.Println("state:", state)
 				log.Println("title:", title)
-				log.Println("Cleaned artist:", artist.GetArtist(trackInfo))
+				// log.Println("Cleaned artist:", metadata.GetArtist(trackInfo))
 				// } else if status["single"] == 1 && status["repeat"] == 1 && status["elapsed"] < 1 {
 			}
 		}
@@ -102,58 +102,18 @@ func main() {
 }
 
 // this could be optimised but im scared of mpd changing stuff around.
-func GetSong(reader *bufio.Reader) *TrackInfo {
+func getSong(reader *bufio.Reader) *TrackInfo {
 	s := TrackInfo{}
-
-	// lines := []string{}
-	for {
-		line, err := reader.ReadString('\n')
-		if err != nil {
-			log.Fatal(err)
-		}
-		// append(lines, line)
-		if line == "OK" || strings.HasPrefix(line, "ACK") {
-			fmt.Println("Response:", line)
-			break
-		}
-	}
-
-	for {
-		line, err := reader.ReadString('\n')
-		if err != nil {
-			log.Fatal(err)
-		}
-		if strings.HasPrefix(line, "Title:") {
-			title, found := strings.CutPrefix(line, "Title: ")
-			if !found {
-				log.Println("no title :(")
-			}
-			s.Title = title
-		}
-		if strings.HasPrefix(line, "Artist:") {
-			artist, found := strings.CutPrefix(line, "Artist: ")
-			if !found {
-				log.Println("no title :(")
-			}
-			s.Artist = strings.TrimSpace(artist)
-		}
-		if strings.HasPrefix(line, "Album:") {
-			album, found := strings.CutPrefix(line, "Album: ")
-			if !found {
-				log.Fatal("no album :(")
-			}
-			s.Album = album
-		}
-		if strings.HasPrefix(line, "AlbumArtist:") {
-			albumArtist, found := strings.CutPrefix(line, "AlbumArtist: ")
-			if !found {
-				log.Fatal("no albumArtist :(")
-			}
-			s.AlbumArtist = albumArtist
-		}
-		if line == "OK" || strings.HasPrefix(line, "ACK") {
-			fmt.Println("Response:", line)
-			break
+	for key, value := range mapOutput(reader) {
+		switch key {
+		case "Title":
+			s.Title = value
+		case "Album":
+			s.Album = value
+		case "Artist":
+			s.Artist = value
+		case "AlbumArtist":
+			s.AlbumArtist = value
 		}
 	}
 	return &s
@@ -161,50 +121,22 @@ func GetSong(reader *bufio.Reader) *TrackInfo {
 
 func getStatus(reader *bufio.Reader) *Status {
 	s := Status{}
-	for {
-		line, err := reader.ReadString('\n')
-		if err != nil {
-			log.Fatal(err)
-		}
-		if strings.HasPrefix(line, "Title:") {
-			repeat, found := strings.CutPrefix(line, "repeat: ")
-			if !found {
-				log.Fatal("no title :(")
-			}
-			int, err := strconv.Atoi(repeat)
+	for key, value := range mapOutput(reader) {
+		switch key {
+		case "state":
+			s.State = value
+		case "repeat":
+			repeat, err := strconv.Atoi(value)
 			if err != nil {
 				log.Fatal(err)
 			}
-			s.Repeat = int
-		}
-		if strings.HasPrefix(line, "Artist:") {
-			artist, found := strings.CutPrefix(line, "Artist: ")
-			if !found {
-				log.Fatal("no title :(")
-			}
-			int, err := strconv.Atoi(repeat)
+			s.Repeat = repeat
+		case "single":
+			single, err := strconv.Atoi(value)
 			if err != nil {
 				log.Fatal(err)
 			}
-			s.Single = int
-		}
-		if strings.HasPrefix(line, "Album:") {
-			album, found := strings.CutPrefix(line, "Album: ")
-			if !found {
-				log.Fatal("no album :(")
-			}
-			s.album = album
-		}
-		if strings.HasPrefix(line, "AlbumArtist:") {
-			albumArtist, found := strings.CutPrefix(line, "AlbumArtist: ")
-			if !found {
-				log.Fatal("no albumArtist :(")
-			}
-			s.albumArtist = albumArtist
-		}
-		if line == "OK" || strings.HasPrefix(line, "ACK") {
-			fmt.Println("Response:", line)
-			break
+			s.Single = single
 		}
 	}
 	return &s
