@@ -69,9 +69,16 @@ func main() {
 			title := trackInfo.Title
 			if title != currentlyWatchedTrack { // check if current track != new track
 				currentlyWatchedTrack = title // set current track to new track
-				log.Println("Cleaned artist:", metadata.GetArtist(trackInfo))
-				// } else if status["single"] == 1 && status["repeat"] == 1 && status["elapsed"] < 1 {
+				makeScrobble(trackInfo, status)
+			} else if status.Single == 1 && status.Repeat == 1 && status.Elapsed < 1 {
+				currentlyWatchedTrack = title // set current track to new track
+				makeScrobble(trackInfo, status)
 			}
 		}
 	}
+}
+
+func makeScrobble(trackInfo metadata.TrackInfo, status metadata.Status) {
+	_ = status
+	log.Println("Cleaned artist:", metadata.GetArtist(trackInfo))
 }
