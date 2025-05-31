@@ -16,9 +16,9 @@ type Result struct {
 	artist string
 }
 
-func GetArtist(trackInfo map[string]any) string {
-	artist := trackInfo["Artist"].(string)
-	albumArtist := trackInfo["AlbumArtist"].(string)
+func GetArtist(trackInfo TrackInfo) string {
+	artist := trackInfo.Artist
+	albumArtist := trackInfo.AlbumArtist
 	config := config.ReadConfig()
 
 	// this code is dumb. make it nicer later
@@ -38,12 +38,12 @@ func GetArtist(trackInfo map[string]any) string {
 				return CheckMetadata(artist)
 			} else {
 				// if all else fails, run back to regex
-				return SeparateArtists(artist)
+				return separateArtists(artist)
 			}
 		} else {
 			// if not, fall back regex-based cutting and allow the user to provide
 			// a custom regex string in the config file
-			return SeparateArtists(artist)
+			return separateArtists(artist)
 		}
 	}
 }
@@ -88,7 +88,8 @@ func splitArtists(input string) []string {
 	return result
 }
 
-func SeparateArtists(artist string) string {
+// this file needs a complete rewrite from here down lol. needs to support custom regex fields and also actually use regex
+func separateArtists(artist string) string {
 	// list of artist separators to check for. could get from config file.
 	//replace with regex??
 	// log.Print(artist)
@@ -109,11 +110,11 @@ func SeparateArtists(artist string) string {
 			log.Print("no separator found!!")
 		}
 	}
-	return AttemptEval(attempts)
+	return attemptEval(attempts)
 }
 
 // pick one of the various attempts to move forward with - this is a stub and also a placeholder
-func AttemptEval(attempts []string) string {
+func attemptEval(attempts []string) string {
 	// log.Print(attempts)
 	match := strings.TrimSpace(attempts[0])
 
