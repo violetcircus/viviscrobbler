@@ -59,9 +59,6 @@ func main() {
 				break
 			}
 		}
-		// get current song
-		fmt.Fprintf(conn, "currentsong\n")
-		trackInfo := metadata.GetSong(reader)
 		// go back to idling after getting status/trackinfo
 		// fmt.Fprintln(conn, "idle player")
 
@@ -69,15 +66,21 @@ func main() {
 		elapsed := 0.0
 		for {
 			time.Sleep(1 * time.Second) // wait one second
+			// get current song from mpd
+			fmt.Fprintf(conn, "currentsong\n")
+			trackInfo := metadata.GetSong(reader)
+			// get current mpd status
 			fmt.Fprintf(conn, "status\n")
 			status := metadata.GetStatus(reader) // get status
-			fmt.Println(status.State)
+			fmt.Println("state:", status.State)
 			switch status.State {
 			case "play": // when in play state, calculate percent through song
 				elapsed = status.Elapsed
 				duration := status.Duration
 				percent := elapsed / duration * 100
 				fmt.Println("percent:", percent)
+				fmt.Println("title:", trackInfo.Title)
+				fmt.Println("currently watched:", currentlyWatchedTrack)
 				// run scrobble check
 				if percent >= config.ScrobbleThreshold && trackInfo.Title != currentlyWatchedTrack {
 					currentlyWatchedTrack = trackInfo.Title // set current track to new track
@@ -90,7 +93,7 @@ func main() {
 			case "pause": // when paused, just go back to the start of the loop
 				// loop again until something else happens
 			case "stop": // when stopped, exit this loop
-				elapsed = 0.0
+				elapsed = 0.0 // not strictly necessary but like,
 				break
 			}
 		}

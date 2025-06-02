@@ -49,7 +49,7 @@ func GetSong(reader *bufio.Reader) TrackInfo {
 		line = strings.TrimSpace(line) // sanitise lines
 		// break loop when track info is complete or an error is given
 		if line == "OK" || strings.HasPrefix(line, "ACK") {
-			fmt.Println("Response:", line)
+			fmt.Println("song response:", line)
 			break
 		}
 		// populate struct
@@ -80,7 +80,7 @@ func GetStatus(reader *bufio.Reader) Status {
 		line = strings.TrimSpace(line) // sanitise lines
 		// break loop when status is retrieved or error is given
 		if line == "OK" || strings.HasPrefix(line, "ACK") {
-			fmt.Println("Response:", line)
+			fmt.Println("status response:", line)
 			break
 		}
 		// populate struct
