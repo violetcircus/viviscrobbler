@@ -13,7 +13,7 @@ type Status struct {
 	State      string
 	Duration   float64
 	Elapsed    float64
-	Time       string
+	Time       float64
 	Repeat     int
 	Single     int
 	Song       int
@@ -90,7 +90,15 @@ func GetStatus(reader *bufio.Reader) Status {
 			case "state":
 				s.State = value
 			case "time":
-				s.Time = value
+				// split on the colon and convert the left value to a float
+				t, _, found := strings.Cut(value, ":")
+				if found {
+					time, err := strconv.ParseFloat(t, 64)
+					if err != nil {
+						log.Fatal(err)
+					}
+					s.Time = time
+				}
 			case "repeat":
 				repeat, err := strconv.Atoi(value)
 				if err != nil {
