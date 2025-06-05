@@ -11,8 +11,9 @@ type Secrets struct {
 	Secret string
 }
 
-// embed all files in the secrets folder
-// go:embed *
+// embed all files in the secrets folder - that includes this one, but it doesn't really matter.
+// this was the simplest way to get it to not freak out if the individual files aren't present
+// go:embed *)
 var content embed.FS
 
 // embed api key and secret at compile time, these are in the gitignore so to build this locally
