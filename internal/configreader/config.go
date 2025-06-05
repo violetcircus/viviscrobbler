@@ -13,6 +13,8 @@ type Config struct {
 	ApiCheck          bool
 	Regex             string
 	ScrobbleThreshold float64
+	ApiKey            string
+	Secret            string
 }
 
 func ReadConfig() Config {

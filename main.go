@@ -6,6 +6,7 @@ import (
 	"github.com/violetcircus/viviscrobbler/internal/configreader"
 	"github.com/violetcircus/viviscrobbler/internal/metadata"
 	"github.com/violetcircus/viviscrobbler/internal/scrobblelogger"
+	"github.com/violetcircus/viviscrobbler/internal/secret"
 	"github.com/violetcircus/viviscrobbler/internal/setup"
 	"log"
 	"net"
@@ -15,6 +16,7 @@ import (
 )
 
 func main() {
+	secret.GetSecrets()
 	log.SetFlags(0)
 	setup.Setup() // call setup function (to do)
 	config := configreader.ReadConfig()
