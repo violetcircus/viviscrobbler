@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"github.com/violetcircus/viviscrobbler/internal/configreader"
 	"github.com/violetcircus/viviscrobbler/internal/metadata"
-	"github.com/violetcircus/viviscrobbler/internal/scrobblelogger"
-	"github.com/violetcircus/viviscrobbler/internal/secret"
+	"github.com/violetcircus/viviscrobbler/internal/scrobbler"
 	"github.com/violetcircus/viviscrobbler/internal/setup"
 	"log"
 	"net"
@@ -16,7 +15,6 @@ import (
 )
 
 func main() {
-	secret.GetSecrets()
 	log.SetFlags(0)
 	setup.Setup() // call setup function (to do)
 	config := configreader.ReadConfig()
@@ -112,12 +110,12 @@ func isRepeat(status metadata.Status) bool {
 }
 
 func makeScrobble(trackInfo metadata.TrackInfo, timestamp string) {
-	s := scrobblelogger.LoggedScrobble{}
+	s := scrobbler.LoggedScrobble{}
 	s.Title = trackInfo.Title
 	s.Artist = trackInfo.Artist
 	s.Album = trackInfo.Album
 	s.Timestamp = timestamp
 	log.Println("Cleaned artist:", metadata.GetArtist(trackInfo.Artist))
-	scrobblelogger.WriteScrobble(s)
-	fmt.Println(scrobblelogger.ReadScrobble())
+	scrobbler.WriteScrobble(s)
+	fmt.Println(scrobbler.ReadScrobble())
 }

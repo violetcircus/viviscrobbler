@@ -1,4 +1,4 @@
-package scrobblelogger
+package scrobbler
 
 import (
 	"encoding/csv"
