@@ -6,7 +6,7 @@ package metadata
 
 import (
 	"fmt"
-	"github.com/violetcircus/viviscrobbler/internal/config"
+	"github.com/violetcircus/viviscrobbler/internal/configreader"
 	"log"
 	"regexp"
 	"strings"
@@ -16,10 +16,8 @@ type Result struct {
 	artist string
 }
 
-func GetArtist(trackInfo TrackInfo) string {
-	artist := trackInfo.Artist
-	albumArtist := trackInfo.AlbumArtist
-	config := config.ReadConfig()
+func GetArtist(artist string) string {
+	config := configreader.ReadConfig()
 
 	// this code is dumb. make it nicer later
 
@@ -30,10 +28,13 @@ func GetArtist(trackInfo TrackInfo) string {
 		// here we check if they want the metadata sanity check
 		if config.SanityCheck == true {
 			// if yes, run it.
+
+			// this messes with reading rockbox log files. not doing it anymore, shouldnt be a problem anyway
 			// step 1: check if first artist == albumArtist. easy
-			if strings.HasPrefix(artist, albumArtist) && len(albumArtist) > 0 {
-				return strings.TrimSpace(albumArtist)
-			} else if config.ApiCheck == true {
+			// if strings.HasPrefix(artist, albumArtist) && len(albumArtist) > 0 {
+			// 	return strings.TrimSpace(albumArtist)
+			// } else
+			if config.ApiCheck == true {
 				// here we do the opt-out api-based check as a second-to-last resort
 				return CheckMetadata(artist)
 			} else {
