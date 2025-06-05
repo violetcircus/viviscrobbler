@@ -4,6 +4,7 @@ import (
 	"embed"
 	"github.com/violetcircus/viviscrobbler/internal/configreader"
 	"log"
+	"strings"
 )
 
 type Secrets struct {
@@ -13,7 +14,8 @@ type Secrets struct {
 
 // embed all files in the secrets folder - that includes this one, but it doesn't really matter.
 // this was the simplest way to get it to not freak out if the individual files aren't present
-// go:embed *)
+
+//go:embed *
 var content embed.FS
 
 // embed api key and secret at compile time, these are in the gitignore so to build this locally
@@ -47,6 +49,6 @@ func GetSecrets() Secrets {
 	} else {
 		apiKey = string(apiKeyFile)
 	}
-	s.ApiKey = apiKey
+	s.ApiKey = strings.TrimSpace(apiKey)
 	return s
 }
