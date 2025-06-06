@@ -17,8 +17,10 @@ type Config struct {
 	Secret            string
 }
 
+var ConfigLocation = "/home/violet/.config/vvscrob/"
+
 func ReadConfig() Config {
-	var configfile = "/home/violet/.config/vvscrob/config.toml"
+	var configfile = ConfigLocation + "config.toml"
 	_, err := os.Stat(configfile)
 	if err != nil {
 		log.Fatal("Config file is missing:", configfile)

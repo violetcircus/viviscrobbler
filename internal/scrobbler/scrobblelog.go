@@ -2,6 +2,7 @@ package scrobbler
 
 import (
 	"encoding/csv"
+	"github.com/violetcircus/viviscrobbler/internal/configreader"
 	"github.com/violetcircus/viviscrobbler/internal/metadata"
 	"log"
 	"os"
@@ -15,7 +16,7 @@ type LoggedScrobble struct {
 }
 
 func WriteScrobble(scrobble LoggedScrobble) {
-	f := "/home/violet/.config/vvscrob/logFile.tsv"
+	f := configreader.ConfigLocation + "logFile.tsv"
 	log.Println("writing scrobble")
 	logFile, err := os.OpenFile(f, os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
@@ -34,7 +35,7 @@ func WriteScrobble(scrobble LoggedScrobble) {
 
 func ReadScrobble() LoggedScrobble {
 	s := LoggedScrobble{}
-	f := "/home/violet/.config/vvscrob/logFile.tsv"
+	f := configreader.ConfigLocation + "logFile.tsv"
 	logFile, err := os.Open(f)
 	if err != nil {
 		log.Fatal(err)
