@@ -68,6 +68,10 @@ func main() {
 			fmt.Println("state:", status.State)
 			switch status.State {
 			case "play": // when in play state, calculate percent through song
+				if trackInfo.Title != currentlyWatchedTrack {
+					fmt.Println("current track:", currentlyWatchedTrack)
+					scrobbler.UpdateNowPlaying(trackInfo)
+				}
 				if isRepeat(status) {
 					timestamp = strconv.FormatInt(time.Now().Unix(), 10)
 				} else if trackInfo.Title != currentlyWatchedTrack {
@@ -81,7 +85,7 @@ func main() {
 				// fmt.Println("title:", trackInfo.Title)
 				// fmt.Println("currently watched:", currentlyWatchedTrack)
 
-				// run scrobble check
+				// run scrobble
 				if percent >= config.ScrobbleThreshold && trackInfo.Title != currentlyWatchedTrack {
 					currentlyWatchedTrack = trackInfo.Title // set current track to new track
 					makeScrobble(trackInfo, timestamp)

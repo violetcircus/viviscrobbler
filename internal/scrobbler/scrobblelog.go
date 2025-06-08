@@ -17,7 +17,6 @@ type LoggedScrobble struct {
 
 func WriteScrobble(scrobble LoggedScrobble) {
 	f := configreader.ConfigLocation + "logFile.tsv"
-	log.Println("writing scrobble")
 	logFile, err := os.OpenFile(f, os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Fatal(err)
@@ -47,7 +46,7 @@ func ReadScrobble() LoggedScrobble {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("scrobbles:", scrobbles)
+
 	scrobble := scrobbles[0]
 	s.Artist = metadata.GetArtist(scrobble[0])
 	s.Album = scrobble[1]
