@@ -8,8 +8,13 @@ type Scrobble struct {
 	Title     string
 	ApiKey    string
 	Secret    string
+	SKey      string
 }
 
 func UploadScrobbles() {
+
+}
+
+func UpdateNowPlaying() {
 
 }

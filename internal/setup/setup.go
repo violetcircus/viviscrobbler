@@ -3,9 +3,9 @@ package setup
 import (
 	"bufio"
 	"crypto/md5"
+	"encoding/csv"
 	"encoding/hex"
 	"encoding/json"
-	"encoding/xml"
 	"errors"
 	"fmt"
 	"github.com/violetcircus/viviscrobbler/internal/configreader"
@@ -15,14 +15,20 @@ import (
 	"net/http"
 	"os"
 	"sort"
+	"strings"
 )
 
 type TokenResponse struct {
 	Token string `json:"token"`
 }
+
 type SessionResponse struct {
-	Name string `xml:"name"`
-	Key  string `xml:"key"`
+	Session Session `json:"session"`
+}
+
+type Session struct {
+	Name string `json:"name"`
+	Key  string `json:"key"`
 }
 
 func Setup() {
@@ -64,16 +70,21 @@ func SignSignature(parameters map[string]string) string {
 	i := 0
 	for k := range parameters {
 		keys[i] = k
-		i++
+		i++ // using a count int instead of an append() is more memory efficient #genius
 	}
 	sort.Strings(keys)
 
-	h := md5.New()
+	// build signature base string
+	var sb strings.Builder
 	for _, key := range keys {
-		io.WriteString(h, key)
-		io.WriteString(h, parameters[key])
+		sb.WriteString(key)
+		sb.WriteString(parameters[key])
 	}
-	io.WriteString(h, secrets.Secret)
+	sb.WriteString(secrets.Secret)
+
+	// calculate md5 hash
+	h := md5.New()
+	io.WriteString(h, sb.String())
 	result := hex.EncodeToString(h.Sum(nil))
 	return result
 }
@@ -81,10 +92,10 @@ func SignSignature(parameters map[string]string) string {
 // gets an auth token from Last.FM
 func GetToken() string {
 	parameters := make(map[string]string)
-	parameters["apiKey"] = secret.GetSecrets().ApiKey
+	parameters["api_key"] = secret.GetSecrets().ApiKey
 	signature := SignSignature(parameters)
 	baseUrl := "https://ws.audioscrobbler.com/2.0/"
-	urlParams := fmt.Sprintf("?method=auth.gettoken&api_key=%v&%v&format=json", parameters["apiKey"], signature)
+	urlParams := fmt.Sprintf("?method=auth.gettoken&api_key=%v&api_sig=%v&format=json", parameters["api_key"], signature)
 
 	resp, err := http.Get(baseUrl + urlParams)
 	if err != nil {
@@ -101,7 +112,7 @@ func GetToken() string {
 		log.Println("json error")
 		log.Fatal(err)
 	}
-	token := result.Token
+	token := strings.TrimSpace(result.Token)
 
 	return token
 }
@@ -120,11 +131,14 @@ func requestAuth() {
 func getSession(token string) {
 	apiKey := secret.GetSecrets().ApiKey
 	parameters := make(map[string]string)
+	parameters["api_key"] = apiKey
+	parameters["method"] = "auth.getSession"
 	parameters["token"] = token
-	parameters["apiKey"] = apiKey
+
 	signature := SignSignature(parameters)
-	baseUrl := "http://www.last.fm/api/auth/"
-	urlParams := fmt.Sprintf("?method=auth.getsession&api_key=%v&token=%v&%v", apiKey, token, signature)
+
+	baseUrl := "https://ws.audioscrobbler.com/2.0/"
+	urlParams := fmt.Sprintf("?method=auth.getSession&api_key=%v&token=%v&api_sig=%v&format=json", apiKey, token, signature)
 
 	resp, err := http.Get(baseUrl + urlParams)
 	if err != nil {
@@ -136,27 +150,25 @@ func getSession(token string) {
 		log.Println("read error")
 		log.Fatal(err)
 	}
-	fmt.Print(body)
 	var result SessionResponse
-	if err := xml.Unmarshal(body, &result); err != nil {
-		log.Println("xml error")
+	if err := json.Unmarshal(body, &result); err != nil {
+		log.Println("json error")
 		log.Fatal(err)
 	}
-	writeSession(result)
+	writeSession(result.Session)
 }
 
-func writeSession(result SessionResponse) {
-	data := []byte(result.Name + "\n" + result.Key)
-	fmt.Println("data", string(data))
-	err := os.WriteFile(configreader.ConfigLocation+".lastfm_session", data, 0644)
-	if err != nil {
-		log.Fatal(err)
-	}
-
+// write the session to a file that can be read from later
+func writeSession(session Session) {
 	f, err := os.Create(configreader.ConfigLocation + ".lastfm_session")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer f.Close()
-
+	w := csv.NewWriter(f)
+	row := []string{session.Name, session.Key}
+	if err := w.Write(row); err != nil {
+		log.Fatal("error writing to file")
+	}
+	w.Flush()
 }

@@ -35,7 +35,7 @@ func GetSecrets() Secrets {
 	} else {
 		secret = string(secretFile)
 	}
-	s.Secret = secret
+	s.Secret = strings.TrimSpace(secret)
 
 	apiKeyFile, err := content.ReadFile("apiKey")
 	apiKey := ""
