@@ -22,7 +22,6 @@ var content embed.FS
 // you will need to add your own api key and secret (acquired from registering an app on LastFM)
 // to the config file.
 func GetSecrets() Secrets {
-	s := Secrets{}
 	secretFile, err := content.ReadFile("secret")
 	secret := ""
 	if err != nil {
@@ -33,9 +32,8 @@ func GetSecrets() Secrets {
 			log.Fatal("your config file needs an Api Key and Secret, read the readme.")
 		}
 	} else {
-		secret = string(secretFile)
+		secret = strings.TrimSpace(string(secretFile))
 	}
-	s.Secret = strings.TrimSpace(secret)
 
 	apiKeyFile, err := content.ReadFile("apiKey")
 	apiKey := ""
@@ -47,8 +45,13 @@ func GetSecrets() Secrets {
 			log.Fatal("your config file needs an Api Key and Secret, read the readme.")
 		}
 	} else {
-		apiKey = string(apiKeyFile)
+		apiKey = strings.TrimSpace(string(apiKeyFile))
 	}
-	s.ApiKey = strings.TrimSpace(apiKey)
+
+	s := Secrets{
+		Secret: secret,
+		ApiKey: apiKey,
+	}
+
 	return s
 }

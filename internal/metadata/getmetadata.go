@@ -38,7 +38,7 @@ func GetSong(reader *bufio.Reader) TrackInfo {
 		log.Fatal(err)
 	}
 
-	// print the status
+	//print the status
 	fmt.Println("Server:", line)
 
 	for {

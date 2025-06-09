@@ -7,7 +7,6 @@ package metadata
 import (
 	"fmt"
 	"github.com/violetcircus/viviscrobbler/internal/configreader"
-	"log"
 	"regexp"
 	"strings"
 )
@@ -29,11 +28,6 @@ func GetArtist(artist string) string {
 		if config.SanityCheck == true {
 			// if yes, run it.
 
-			// this messes with reading rockbox log files. not doing it anymore, shouldnt be a problem anyway
-			// step 1: check if first artist == albumArtist. easy
-			// if strings.HasPrefix(artist, albumArtist) && len(albumArtist) > 0 {
-			// 	return strings.TrimSpace(albumArtist)
-			// } else
 			if config.ApiCheck == true {
 				// here we do the opt-out api-based check as a second-to-last resort
 				return CheckMetadata(artist)
@@ -59,7 +53,7 @@ func CheckMetadata(artist string) string {
 			return strings.TrimSpace(name)
 		}
 	}
-	return "failed to find artist"
+	return separateArtists(artist)
 }
 
 func splitArtists(input string) []string {
@@ -89,35 +83,9 @@ func splitArtists(input string) []string {
 	return result
 }
 
-// this file needs a complete rewrite from here down lol. needs to support custom regex fields and also actually use regex
 func separateArtists(artist string) string {
-	// list of artist separators to check for. could get from config file.
-	//replace with regex??
-	// log.Print(artist)
-	separators := []string{
-		"feat.", "Featuring", "featuring", " x ", ",", ";", "/", "&", "and",
-	}
-	// slice containing attempts to find 1st artist name
-	attempts := []string{}
-
-	// loop over the separators checking if any show up in the artist string
-	for _, separator := range separators {
-		artist, _, found := strings.Cut(artist, separator)
-		if found {
-			attempts = append(attempts, artist)
-			// log.Print(separator)
-			// log.Print("artist", artist)
-		} else {
-			log.Print("no separator found!!")
-		}
-	}
-	return attemptEval(attempts)
-}
-
-// pick one of the various attempts to move forward with - this is a stub and also a placeholder
-func attemptEval(attempts []string) string {
-	// log.Print(attempts)
-	match := strings.TrimSpace(attempts[0])
-
-	return match
+	// can easily just put the config file regex field in here but ill do that later
+	re := regexp.MustCompile(`(?i)\s*(,|;|&|feat\.|ft\.|featuring|and|\/)\s*`)
+	parts := re.Split(artist, -1)
+	return parts[0]
 }

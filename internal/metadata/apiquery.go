@@ -23,7 +23,7 @@ type ArtistResponse struct {
 
 func SendQuery(artist string) string {
 	// assemble the query URL
-	query := fmt.Sprintf(`artist="%v"&limit=1`, artist)
+	query := fmt.Sprintf(`artist:"%v"&limit=1`, artist)
 	params := url.Values{}
 	params.Add("query", query)
 	params.Add("fmt", "json")

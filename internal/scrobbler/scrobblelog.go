@@ -1,11 +1,15 @@
 package scrobbler
 
 import (
+	"bytes"
 	"encoding/csv"
+	"fmt"
 	"github.com/violetcircus/viviscrobbler/internal/configreader"
 	"github.com/violetcircus/viviscrobbler/internal/metadata"
+	"io"
 	"log"
 	"os"
+	"sync"
 )
 
 type LoggedScrobble struct {
@@ -14,6 +18,8 @@ type LoggedScrobble struct {
 	Album     string
 	Timestamp string
 }
+
+var fileMutex sync.Mutex
 
 // write scrobble to file
 func WriteScrobble(scrobble LoggedScrobble) {
@@ -34,10 +40,11 @@ func WriteScrobble(scrobble LoggedScrobble) {
 }
 
 // read scrobbles from file
-func ReadScrobble() LoggedScrobble {
+func ReadScrobble(wg *sync.WaitGroup) LoggedScrobble {
+	defer wg.Done()
 	s := LoggedScrobble{}
 	f := configreader.ConfigLocation + "logFile.tsv"
-	logFile, err := os.Open(f)
+	logFile, err := os.OpenFile(f, os.O_RDWR, os.ModeAppend)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -49,10 +56,71 @@ func ReadScrobble() LoggedScrobble {
 		log.Fatal(err)
 	}
 
-	scrobble := scrobbles[0]
-	s.Artist = metadata.GetArtist(scrobble[0])
-	s.Album = scrobble[1]
-	s.Title = scrobble[2]
-	s.Timestamp = scrobble[3]
-	return s
+	for {
+		if len(scrobbles) > 0 {
+			scrobble := scrobbles[0]
+			s = LoggedScrobble{
+				Artist:    metadata.GetArtist(scrobble[0]),
+				Album:     scrobble[1],
+				Title:     scrobble[2],
+				Timestamp: scrobble[3],
+			}
+			log.Printf("scrobble: %s", s)
+			if UploadScrobbles(s) {
+				popLine(logFile)
+			}
+		} else {
+			continue
+		}
+	}
+}
+
+// delete first line of file
+func popLine(f *os.File) {
+	fi, err := f.Stat()
+	if err != nil {
+		log.Fatal(err)
+	}
+	if fi.Size() > 0 {
+		buf := bytes.NewBuffer(make([]byte, 0, fi.Size()))
+
+		_, err = f.Seek(0, io.SeekStart) // move file pointer to start
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		_, err = io.Copy(buf, f)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		line, err := buf.ReadBytes('\n')
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("popped line:", string(line))
+
+		_, err = f.Seek(0, io.SeekStart)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		nw, err := io.Copy(f, buf)
+		if err != nil {
+			fmt.Println("copy error")
+			log.Fatal(err)
+		}
+
+		err = f.Truncate(nw)
+		if err != nil {
+			fmt.Println("truncate error")
+			log.Fatal(err)
+		}
+		err = f.Sync()
+		if err != nil {
+			fmt.Println("sync error")
+			log.Fatal(err)
+		}
+
+	}
 }

@@ -11,12 +11,18 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
 func main() {
 	log.SetFlags(0)
 	setup.Setup() // call setup function (to do)
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go scrobbler.ReadScrobble(&wg)
+
 	config := configreader.ReadConfig()
 
 	// say hi
@@ -114,12 +120,13 @@ func isRepeat(status metadata.Status) bool {
 }
 
 func makeScrobble(trackInfo metadata.TrackInfo, timestamp string) {
-	s := scrobbler.LoggedScrobble{}
-	s.Title = trackInfo.Title
-	s.Artist = trackInfo.Artist
-	s.Album = trackInfo.Album
-	s.Timestamp = timestamp
+	s := scrobbler.LoggedScrobble{
+		Title:     trackInfo.Title,
+		Artist:    trackInfo.Artist,
+		Album:     trackInfo.Album,
+		Timestamp: timestamp,
+	}
 	log.Println("Cleaned artist:", metadata.GetArtist(trackInfo.Artist))
 	scrobbler.WriteScrobble(s)
-	fmt.Println(scrobbler.ReadScrobble())
+	// fmt.Println(scrobbler.ReadScrobble())
 }
