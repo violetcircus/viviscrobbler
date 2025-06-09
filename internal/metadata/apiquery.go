@@ -22,8 +22,9 @@ type ArtistResponse struct {
 }
 
 func SendQuery(artist string) string {
+	fmt.Println("received artist:", artist)
 	// assemble the query URL
-	query := fmt.Sprintf(`artist:"%v"&limit=1`, artist)
+	query := fmt.Sprintf(`artist:"%v"`, artist)
 	params := url.Values{}
 	params.Add("query", query)
 	params.Add("fmt", "json")
@@ -63,13 +64,13 @@ func SendQuery(artist string) string {
 	// log.Print(string(prettyJSON))
 
 	// search artists for the artist name
-	found := false
+	var found bool
 	target := artist
 	newArtist := ""
-	for _, artist := range artists {
-		if strings.Contains(strings.ToLower(artist.Name), strings.ToLower(target)) {
+	for _, name := range artists {
+		if strings.Contains(strings.ToLower(name.Name), strings.ToLower(target)) {
 			found = true
-			newArtist = artist.Name
+			newArtist = name.Name
 			break
 		}
 	}

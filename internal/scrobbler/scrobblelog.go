@@ -19,10 +19,11 @@ type LoggedScrobble struct {
 	Timestamp string
 }
 
-var fileMutex sync.Mutex
+var m sync.Mutex
 
 // write scrobble to file
 func WriteScrobble(scrobble LoggedScrobble) {
+	m.Lock()
 	f := configreader.ConfigLocation + "logFile.tsv"
 	logFile, err := os.OpenFile(f, os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
@@ -37,26 +38,27 @@ func WriteScrobble(scrobble LoggedScrobble) {
 		log.Fatal("error writing to file")
 	}
 	w.Flush()
+	m.Unlock()
 }
 
 // read scrobbles from file
 func ReadScrobble(wg *sync.WaitGroup) LoggedScrobble {
 	defer wg.Done()
-	s := LoggedScrobble{}
 	f := configreader.ConfigLocation + "logFile.tsv"
-	logFile, err := os.OpenFile(f, os.O_RDWR, os.ModeAppend)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer logFile.Close()
-	r := csv.NewReader(logFile)
-	r.Comma = '\t'
-	scrobbles, err := r.ReadAll()
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	for {
+		m.Lock()
+		s := LoggedScrobble{}
+		logFile, err := os.OpenFile(f, os.O_RDWR, os.ModeAppend)
+		if err != nil {
+			log.Fatal(err)
+		}
+		r := csv.NewReader(logFile)
+		r.Comma = '\t'
+		scrobbles, err := r.ReadAll()
+		if err != nil {
+			log.Fatal(err)
+		}
 		if len(scrobbles) > 0 {
 			scrobble := scrobbles[0]
 			s = LoggedScrobble{
@@ -70,8 +72,12 @@ func ReadScrobble(wg *sync.WaitGroup) LoggedScrobble {
 				popLine(logFile)
 			}
 		} else {
+			logFile.Close()
+			m.Unlock()
 			continue
 		}
+		logFile.Close()
+		m.Unlock()
 	}
 }
 
