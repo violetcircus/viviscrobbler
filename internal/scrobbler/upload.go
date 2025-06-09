@@ -41,14 +41,20 @@ func getSession() string {
 	return data[0][1]
 }
 
+// upload scrobbles provided by whatever source: used by
+// the thread that reads from the log and also when processing
+// a user-provided file from rockbox
 func UploadScrobbles() {
 
 }
 
+// update last.fm's Now Playing api with current track - independent of scrobbling, so is run from main loop
+// whenever the song changes
 func UpdateNowPlaying(trackInfo metadata.TrackInfo) {
 	apiKey := secret.GetSecrets().ApiKey
 	sk := getSession()
 
+	// prepare the parameters for signature signing
 	parameters := map[string]string{
 		"api_key": apiKey,
 		"artist":  metadata.CheckMetadata(trackInfo.Artist),
@@ -58,10 +64,12 @@ func UpdateNowPlaying(trackInfo metadata.TrackInfo) {
 		"sk":      sk,
 	}
 	signature := setup.SignSignature(parameters)
+	// add signature to params after creating it
 	parameters["api_sig"] = signature
 
 	baseUrl := "https://ws.audioscrobbler.com/2.0/"
 
+	// assemble params into a suitable format for post request
 	postBody := url.Values{}
 	for a, b := range parameters {
 		path, err := url.PathUnescape(b)
@@ -71,6 +79,7 @@ func UpdateNowPlaying(trackInfo metadata.TrackInfo) {
 		postBody.Set(a, path)
 	}
 
+	// send post request to now playing api
 	resp, err := http.Post(baseUrl, "application/x-www-form-urlencoded", strings.NewReader(postBody.Encode()))
 	if err != nil {
 		log.Fatal(err)

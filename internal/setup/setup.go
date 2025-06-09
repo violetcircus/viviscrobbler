@@ -91,8 +91,9 @@ func SignSignature(parameters map[string]string) string {
 
 // gets an auth token from Last.FM
 func GetToken() string {
-	parameters := make(map[string]string)
-	parameters["api_key"] = secret.GetSecrets().ApiKey
+	parameters := map[string]string{
+		"api_key": secret.GetSecrets().ApiKey,
+	}
 	signature := SignSignature(parameters)
 	baseUrl := "https://ws.audioscrobbler.com/2.0/"
 	urlParams := fmt.Sprintf("?method=auth.gettoken&api_key=%v&api_sig=%v&format=json", parameters["api_key"], signature)
@@ -130,11 +131,11 @@ func requestAuth() {
 // get last fm session id and username
 func getSession(token string) {
 	apiKey := secret.GetSecrets().ApiKey
-	parameters := make(map[string]string)
-	parameters["api_key"] = apiKey
-	parameters["method"] = "auth.getSession"
-	parameters["token"] = token
-
+	parameters := map[string]string{
+		"api_key": apiKey,
+		"method":  "auth.getSession",
+		"token":   token,
+	}
 	signature := SignSignature(parameters)
 
 	baseUrl := "https://ws.audioscrobbler.com/2.0/"

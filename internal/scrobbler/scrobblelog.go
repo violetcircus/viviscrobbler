@@ -15,6 +15,7 @@ type LoggedScrobble struct {
 	Timestamp string
 }
 
+// write scrobble to file
 func WriteScrobble(scrobble LoggedScrobble) {
 	f := configreader.ConfigLocation + "logFile.tsv"
 	logFile, err := os.OpenFile(f, os.O_APPEND|os.O_WRONLY, 0644)
@@ -32,6 +33,7 @@ func WriteScrobble(scrobble LoggedScrobble) {
 	w.Flush()
 }
 
+// read scrobbles from file
 func ReadScrobble() LoggedScrobble {
 	s := LoggedScrobble{}
 	f := configreader.ConfigLocation + "logFile.tsv"
