@@ -2,7 +2,6 @@ package metadata
 
 // this file solves the Main Problem i created this program to solve: submitting only the first artist in the metadata field
 // to last.fm when provided with metadata in the form of a string separated by any number of arbitrary separators.
-// this project began literally on day 1 of me learning go
 
 import (
 	"fmt"
@@ -17,8 +16,6 @@ type Result struct {
 
 func GetArtist(artist string) string {
 	config := configreader.ReadConfig()
-
-	// this code is dumb. make it nicer later
 
 	// if user opted out of first-artist scrobble, leave metadata as is
 	if config.SingleArtist == false {

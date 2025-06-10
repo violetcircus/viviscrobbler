@@ -59,6 +59,7 @@ func ReadScrobble(wg *sync.WaitGroup) LoggedScrobble {
 		if err != nil {
 			log.Fatal(err)
 		}
+		// if there's scrobbles in the file, read the first one
 		if len(scrobbles) > 0 {
 			scrobble := scrobbles[0]
 			s = LoggedScrobble{
@@ -68,10 +69,12 @@ func ReadScrobble(wg *sync.WaitGroup) LoggedScrobble {
 				Timestamp: scrobble[3],
 			}
 			log.Printf("scrobble: %s", s)
+			// if scrobble successfully uploaded, remove top line from file
 			if UploadScrobbles(s) {
 				popLine(logFile)
 			}
 		} else {
+			// if no scrobbles, go to next loop
 			logFile.Close()
 			m.Unlock()
 			continue
@@ -95,11 +98,13 @@ func popLine(f *os.File) {
 			log.Fatal(err)
 		}
 
+		// copy file to buffer
 		_, err = io.Copy(buf, f)
 		if err != nil {
 			log.Fatal(err)
 		}
 
+		// pop first line off buffer
 		line, err := buf.ReadBytes('\n')
 		if err != nil {
 			log.Fatal(err)
@@ -111,22 +116,63 @@ func popLine(f *os.File) {
 			log.Fatal(err)
 		}
 
+		// copy buffer back to file
 		nw, err := io.Copy(f, buf)
 		if err != nil {
 			fmt.Println("copy error")
 			log.Fatal(err)
 		}
 
+		// truncate file down
 		err = f.Truncate(nw)
 		if err != nil {
 			fmt.Println("truncate error")
 			log.Fatal(err)
 		}
+
+		// make sure it's all written
 		err = f.Sync()
 		if err != nil {
 			fmt.Println("sync error")
 			log.Fatal(err)
 		}
-
 	}
+}
+
+func ReadRockboxLog(path string) {
+	f, err := os.OpenFile(path, os.O_RDWR, os.ModeAppend)
+	if err != nil {
+		log.Fatal(err)
+	}
+	r := csv.NewReader(f)
+	r.Comma = '\t'
+	r.FieldsPerRecord = -1
+	scrobbles, err := r.ReadAll()
+	if err != nil {
+		log.Fatal(err)
+	}
+	// if there's scrobbles in the file, read the first one
+	if len(scrobbles) > 4 {
+		for i, scrobble := range scrobbles {
+			if i >= 4 { // data doesnt start until line 5
+				fmt.Println("scrobble 0:", scrobble)
+				s := LoggedScrobble{
+					Artist:    metadata.GetArtist(scrobble[0]),
+					Album:     scrobble[1],
+					Title:     scrobble[2],
+					Timestamp: scrobble[6],
+				}
+				fmt.Println("hi")
+				fmt.Println("scrobble:", s)
+				if !UploadScrobbles(s) {
+					// if scrobble upload fails, add it to the main log file to be handled later then skip it
+					WriteScrobble(s)
+					continue
+				}
+			} else { // skip the first 4 lines of the file. they're just extra stuff
+				continue
+			}
+		}
+	}
+	os.Exit(0)
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/violetcircus/viviscrobbler/internal/setup"
 	"log"
 	"net"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -18,6 +19,9 @@ import (
 func main() {
 	log.SetFlags(0)
 	setup.Setup() // call setup function (to do)
+
+	args := os.Args
+	handleArgs(args)
 
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -119,6 +123,7 @@ func isRepeat(status metadata.Status) bool {
 	}
 }
 
+// send song to be written as a scrobble in the log
 func makeScrobble(trackInfo metadata.TrackInfo, timestamp string) {
 	s := scrobbler.LoggedScrobble{
 		Title:     trackInfo.Title,
@@ -129,4 +134,16 @@ func makeScrobble(trackInfo metadata.TrackInfo, timestamp string) {
 	log.Println("Cleaned artist:", metadata.GetArtist(trackInfo.Artist))
 	scrobbler.WriteScrobble(s)
 	// fmt.Println(scrobbler.ReadScrobble())
+}
+
+// handle arguments
+func handleArgs(args []string) {
+	if len(args) > 1 {
+		arg := args[1]
+		f, err := os.Stat(arg)
+		if err != nil {
+			log.Fatal("not a file!! please use the full path to your scrobble log.", f)
+		}
+		scrobbler.ReadRockboxLog(arg)
+	}
 }
