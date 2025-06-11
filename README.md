@@ -4,7 +4,9 @@ a last FM scrobbler written in Go, for MPD and Rockbox.
 ## why?
 two main reasons.
 1. no scrobbler exists that is exactly perfect for my use-case:
+
     a. I'm a recovering Spotify user, and the majority of my last.fm history is in the format spotify provides: only the first artist in is scrobbled when multiple are present on a song, and the rest are discarded. As far as I could tell from a cursory look, no other scrobbler for MPD has this behaviour - this presented a problem, as I wanted to have backwards compatibility with my old listens.
+
     b. I recently got an ipod 5 and put rockbox on it, and wanted the listening history from that to be backwards compatible too. 
 2. i wanted to learn go, and figured this would be fun.
 ## installation:
