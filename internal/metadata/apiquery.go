@@ -66,6 +66,7 @@ func SendQuery(artist string) string {
 
 	// search artists for the artist name
 	var found bool
+	log.Println("pre-check artist", artist)
 	target := artist
 	newArtist := ""
 	for _, name := range artists {

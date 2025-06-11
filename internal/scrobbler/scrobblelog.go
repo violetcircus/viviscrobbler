@@ -50,6 +50,7 @@ func ReadScrobble(wg *sync.WaitGroup) LoggedScrobble {
 		m.Lock()
 		s := LoggedScrobble{}
 		logFile, err := os.OpenFile(f, os.O_RDWR, os.ModeAppend)
+		defer logFile.Close()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -62,8 +63,9 @@ func ReadScrobble(wg *sync.WaitGroup) LoggedScrobble {
 		// if there's scrobbles in the file, read the first one
 		if len(scrobbles) > 0 {
 			scrobble := scrobbles[0]
+			artist := metadata.GetArtist(scrobble[0])
 			s = LoggedScrobble{
-				Artist:    metadata.GetArtist(scrobble[0]),
+				Artist:    artist,
 				Album:     scrobble[1],
 				Title:     scrobble[2],
 				Timestamp: scrobble[3],

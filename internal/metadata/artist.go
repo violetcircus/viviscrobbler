@@ -39,6 +39,7 @@ func CheckMetadata(artist string) string {
 	artists := splitArtists(artist)
 	for i := range artists {
 		name := strings.Join(artists[:len(artists)-i], "")
+		fmt.Println("name:", name)
 		if SendQuery(name) != "Not an artist" {
 			return strings.TrimSpace(name)
 		}
@@ -62,7 +63,6 @@ func splitArtists(input string) []string {
 		if trimmedPart != "" {
 			result = append(result, trimmedPart)
 		}
-
 		if i < len(separators) {
 			sep := fmt.Sprintf("%v ", strings.TrimSpace(separators[i])) // capture group for the separator itself
 			if sep != "" {

@@ -201,5 +201,9 @@ func WriteConfig() {
 	if err := t.Encode(config); err != nil {
 		log.Fatal(err)
 	}
+	err = f.Sync()
+	if err != nil {
+		log.Fatal(err)
+	}
 	log.Println("config written!")
 }
