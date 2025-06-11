@@ -1,4 +1,5 @@
 internal/secret/apiKey
 internal/secret/secret
+.air.toml
 tmp/
 viviscrobbler
