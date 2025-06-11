@@ -1,5 +1,5 @@
 # viviscrobbler
-a last FM scrobbler written in Golang, for MPD and Rockbox.
+#### a last FM scrobbler written in Golang, for MPD and Rockbox.
 --- 
 
 ## why?
