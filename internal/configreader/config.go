@@ -8,7 +8,6 @@ import (
 
 type Config struct {
 	SingleArtist      bool
-	SanityCheck       bool
 	ApiCheck          bool
 	Regex             string
 	ScrobbleThreshold float64

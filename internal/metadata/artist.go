@@ -22,16 +22,9 @@ func GetArtist(artist string) string {
 		return artist
 	} else {
 		// here we check if they want the metadata sanity check
-		if config.SanityCheck == true {
-			// if yes, run it.
-
-			if config.ApiCheck == true {
-				// here we do the opt-out api-based check as a second-to-last resort
-				return CheckMetadata(artist)
-			} else {
-				// if all else fails, run back to regex
-				return separateArtists(artist)
-			}
+		if config.ApiCheck == true {
+			// here we do the opt-out api-based check as a second-to-last resort
+			return CheckMetadata(artist)
 		} else {
 			// if not, fall back regex-based cutting and allow the user to provide
 			// a custom regex string in the config file
@@ -80,9 +73,15 @@ func splitArtists(input string) []string {
 	return result
 }
 
+// separate artists based on regex
 func separateArtists(artist string) string {
-	// can easily just put the config file regex field in here but ill do that later
-	re := regexp.MustCompile(`(?i)\s*(,|;|&|feat\.|ft\.|featuring|and|\/)\s*`)
+	userRegex := configreader.ReadConfig().Regex
+	var re *regexp.Regexp
+	if userRegex != "" {
+		re = regexp.MustCompile(userRegex)
+	} else {
+		re = regexp.MustCompile(`(?i)\s*(,|;|&|feat\.|ft\.|featuring|and|\/)\s*`)
+	}
 	parts := re.Split(artist, -1)
 	return parts[0]
 }

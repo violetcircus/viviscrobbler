@@ -183,7 +183,6 @@ func writeSession(session Session) {
 func WriteConfig() {
 	config := configreader.Config{
 		SingleArtist:      true,
-		SanityCheck:       true,
 		ApiCheck:          true,
 		Regex:             "",
 		ScrobbleThreshold: 50.0,
