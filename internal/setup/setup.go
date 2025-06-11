@@ -58,7 +58,7 @@ func createConfig() {
 				requestAuth()
 			// write default config to file
 			case "config.toml":
-				writeConfig()
+				WriteConfig()
 			}
 		} else {
 			// handle error case that isnt the file not existing

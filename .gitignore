@@ -1,2 +1,4 @@
 internal/secret/apiKey
 internal/secret/secret
+tmp/
+viviscrobbler

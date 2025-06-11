@@ -1,0 +1,14 @@
+[Unit]
+Description=viviscrobbler!
+# You should use mpd as a systemd user service to ensure viviscrobbler starts up after it. See the following link for more info:
+# https://wiki.archlinux.org/index.php/Music_Player_Daemon#Autostart_with_systemd
+After=mpd.service
+
+[Service]
+Type=simple
+Environment="NON_INTERACTIVE=1"
+# Note: Please update this to your installed viviscrobbler binary's path if necessary. 
+ExecStart=viviscrobbler
+
+[Install]
+WantedBy=default.target
