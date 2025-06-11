@@ -7,8 +7,8 @@ two main reasons.
 
     a. I'm a recovering Spotify user, and the majority of my last.fm history is in the format spotify provides: only the first artist in is scrobbled when multiple are present on a song, and the rest are discarded. As far as I could tell from a cursory look, no other scrobbler for MPD has this behaviour - this presented a problem, as I wanted to have backwards compatibility with my old listens.
 
-    b. I recently got an ipod 5 and put rockbox on it, and wanted the listening history from that to be backwards compatible too. 
-2. i wanted to learn go, and figured this would be fun.
+    a. I recently got an ipod 5 and put rockbox on it, and wanted the listening history from that to be backwards compatible too. 
+1. i wanted to learn go, and figured this would be fun.
 ## installation:
 either use the compiled release files or clone the repo and build it yourself - or, alternatively, use go install.
 ### dependencies:
@@ -46,3 +46,5 @@ IMPORTANT NOTE: If you build from source, you will need to provide your own API 
 - Thanks to [YAMS](https://github.com/Berulacks/yams/) for being the main inspiration behind this project - their code was a great help while I was making this, and I directly lifted their systemd service, so go give them a star if you like this.
 - This currently only works with Last.FM, because that's what I use. If you want to use another service I'm sure it wouldn't be hard to fork this and rework some of the api queries to point elsewhere.
 - the scrobbler gets the first artist listed in metadata by splitting the artist string up across several separators and creating a slice consisting of each section - including the separators - then iterates over that slice, concatenating it together, checking that against musicbrainz's database, then dropping the end off and doing it again until it either finds an artist or reaches the beginning of the string.
+### known issues:
+- for some reason, it keeps cutting artist names down further than it should - this seems to especially be an issue with Tyler, the Creator, who's been a thorn in the side of this program's development from the outset. Someone please tell artists to stop putting delimiters in their stage names.
