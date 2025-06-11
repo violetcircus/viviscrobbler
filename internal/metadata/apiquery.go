@@ -38,6 +38,7 @@ func SendQuery(artist string) string {
 		fmt.Println("whoops. messed up on the get")
 		log.Fatal(err)
 	}
+	defer resp.Body.Close()
 	// convert response into string
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {

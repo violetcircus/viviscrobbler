@@ -114,6 +114,7 @@ func GetToken() string {
 		log.Println("read error")
 		log.Fatal(err)
 	}
+	defer resp.Body.Close()
 	var result TokenResponse
 	if err := json.Unmarshal(body, &result); err != nil {
 		log.Println("json error")
@@ -152,6 +153,7 @@ func getSession(token string) {
 		log.Println("get error")
 		log.Fatal(err)
 	}
+	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Println("read error")

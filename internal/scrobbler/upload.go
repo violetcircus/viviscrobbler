@@ -78,6 +78,7 @@ func UploadScrobbles(scrobble LoggedScrobble) bool {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatal(err)
@@ -129,6 +130,7 @@ func UpdateNowPlaying(trackInfo metadata.TrackInfo) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer resp.Body.Close()
 	_ = resp
 	// body, err := io.ReadAll(resp.Body)
 	// if err != nil {
