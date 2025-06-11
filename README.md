@@ -19,7 +19,7 @@ go build
 ```
 this will create the viviscrobbler executable file, which you should move to your PATH.
 ### using go install
-you can also install this with `go install github.com/violetcircus/viviscrobbler@latest`. 
+you can also install this with `go install github.com/violetcircus/viviscrobbler`.
 ## usage:
 `viviscrobbler`on its own will initiate the scrobbler.
 `viviscrobbler {PATH}` will load the file at the path and attempt to parse it for scrobbles - this is intended to be used with Rockbox's lastfm plugin's specific output format, so anything that doesn't conform to that format will not work!
