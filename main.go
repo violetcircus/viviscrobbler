@@ -136,14 +136,29 @@ func makeScrobble(trackInfo metadata.TrackInfo, timestamp string) {
 	// fmt.Println(scrobbler.ReadScrobble())
 }
 
-// handle arguments
+// handle arguments: write default config to file when program is run with config, otherwise run rockbox
+// scrobbling on provided filepath
 func handleArgs(args []string) {
 	if len(args) > 1 {
 		arg := args[1]
-		f, err := os.Stat(arg)
-		if err != nil {
-			log.Fatal("not a file!! please use the full path to your scrobble log.", f)
+		switch arg {
+		case "config":
+			setup.WriteConfig()
+		default:
+			f, err := os.Stat(arg)
+			if err != nil {
+				log.Fatal("not a file!! please use the full path to your scrobble log. ~ shortcut for /home/user is okay.", f)
+			}
+			// allow user to use ~ home shortcut in path
+			if strings.HasPrefix(arg, "~") {
+				h, err := os.UserHomeDir()
+				if err != nil {
+					log.Fatal(err)
+				}
+				scrobbler.ReadRockboxLog(strings.Replace(arg, "~", h, 1))
+			} else {
+				scrobbler.ReadRockboxLog(arg)
+			}
 		}
-		scrobbler.ReadRockboxLog(arg)
 	}
 }

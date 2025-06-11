@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/BurntSushi/toml"
 	"github.com/violetcircus/viviscrobbler/internal/configreader"
 	"github.com/violetcircus/viviscrobbler/internal/secret"
 	"io"
@@ -40,19 +41,24 @@ func createConfig() {
 	files := []string{"config.toml", ".lastfm_session", "logFile.tsv"}
 
 	for _, file := range files {
-		if _, err := os.Stat(configreader.ConfigLocation + file); err == nil {
+		if _, err := os.Stat(configreader.GetConfigDir() + file); err == nil {
 			continue // skip file if it exists already
 		} else if errors.Is(err, os.ErrNotExist) {
 			// make it if it doesn't
-			configFile, err := os.Create(configreader.ConfigLocation + file)
+			configFile, err := os.Create(configreader.GetConfigDir() + file)
 			if err != nil {
 				log.Fatal(err)
 			}
 			defer configFile.Close()
 
+			// do different things per file
+			switch file {
 			// if there's no saved last fm session, make one
-			if file == ".lastfm_session" {
+			case ".lastfm_session":
 				requestAuth()
+			// write default config to file
+			case "config.toml":
+				writeConfig()
 			}
 		} else {
 			// handle error case that isnt the file not existing
@@ -161,7 +167,7 @@ func getSession(token string) {
 
 // write the session to a file that can be read from later
 func writeSession(session Session) {
-	f, err := os.Create(configreader.ConfigLocation + ".lastfm_session")
+	f, err := os.Create(configreader.GetConfigDir() + ".lastfm_session")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -172,4 +178,27 @@ func writeSession(session Session) {
 		log.Fatal("error writing to file")
 	}
 	w.Flush()
+}
+
+func WriteConfig() {
+	config := configreader.Config{
+		SingleArtist:      true,
+		SanityCheck:       true,
+		ApiCheck:          true,
+		Regex:             "",
+		ScrobbleThreshold: 50.0,
+		ApiKey:            "",
+		Secret:            "",
+	}
+	f, err := os.Create(configreader.GetConfigDir() + "config.toml")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	t := toml.NewEncoder(f)
+	if err := t.Encode(config); err != nil {
+		log.Fatal(err)
+	}
+	log.Println("config written!")
 }

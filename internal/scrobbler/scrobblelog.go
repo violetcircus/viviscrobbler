@@ -24,7 +24,7 @@ var m sync.Mutex
 // write scrobble to file
 func WriteScrobble(scrobble LoggedScrobble) {
 	m.Lock()
-	f := configreader.ConfigLocation + "logFile.tsv"
+	f := configreader.GetConfigDir() + "logFile.tsv"
 	logFile, err := os.OpenFile(f, os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Fatal(err)
@@ -44,7 +44,7 @@ func WriteScrobble(scrobble LoggedScrobble) {
 // read scrobbles from file
 func ReadScrobble(wg *sync.WaitGroup) LoggedScrobble {
 	defer wg.Done()
-	f := configreader.ConfigLocation + "logFile.tsv"
+	f := configreader.GetConfigDir() + "logFile.tsv"
 
 	for {
 		m.Lock()
@@ -174,5 +174,6 @@ func ReadRockboxLog(path string) {
 			}
 		}
 	}
+	// quit when done to avoid entering the main loop. should not run two instances of this program at once
 	os.Exit(0)
 }

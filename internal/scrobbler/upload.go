@@ -27,7 +27,7 @@ type Scrobble struct {
 
 // get session key from session file
 func getSession() string {
-	f, err := os.Open(configreader.ConfigLocation + ".lastfm_session")
+	f, err := os.Open(configreader.GetConfigDir() + ".lastfm_session")
 	if err != nil {
 		log.Fatal(err)
 	}

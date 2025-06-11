@@ -7,7 +7,6 @@ import (
 )
 
 type Config struct {
-	Service           string
 	SingleArtist      bool
 	SanityCheck       bool
 	ApiCheck          bool
@@ -17,14 +16,23 @@ type Config struct {
 	Secret            string
 }
 
-var ConfigLocation = "/home/violet/.config/vvscrob/"
+// get config directory
+func GetConfigDir() string {
+	configDir, err := os.UserConfigDir()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return configDir + "/vvscrobbler/"
+}
 
+// read config
 func ReadConfig() Config {
-	var configfile = ConfigLocation + "config.toml"
-	_, err := os.Stat(configfile)
+	var configfile = GetConfigDir() + "config.toml"
+	x, err := os.Stat(configfile)
 	if err != nil {
 		log.Fatal("Config file is missing:", configfile)
 	}
+	_ = x
 
 	var config Config
 	if _, err := toml.DecodeFile(configfile, &config); err != nil {
