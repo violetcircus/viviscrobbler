@@ -57,16 +57,16 @@ func SendQuery(artist string) string {
 	if len(artists) > limit {
 		artists = artists[:limit]
 	}
-	// make that into a json object for debugging
+	//make that into a json object for debugging
 	// prettyJSON, err := json.MarshalIndent(artists, "", " ")
 	// if err != nil {
 	// 	log.Fatal(err)
 	// }
 	// log.Print(string(prettyJSON))
+	fmt.Println("musicbrainz status code:", resp.StatusCode)
 
 	// search artists for the artist name
 	var found bool
-	log.Println("pre-check artist", artist)
 	target := artist
 	newArtist := ""
 	for _, name := range artists {

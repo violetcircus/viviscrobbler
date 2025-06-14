@@ -91,16 +91,14 @@ func main() {
 				duration := status.Duration
 				percent := elapsed / duration * 100
 
-				fmt.Println("percent:", percent)
-				// fmt.Println("title:", trackInfo.Title)
-				// fmt.Println("currently watched:", currentlyWatchedTrack)
+				log.Println("percent:", percent)
 
-				// run scrobble
-				if percent >= config.ScrobbleThreshold && trackInfo.Title != currentlyWatchedTrack {
+				// check if user has the track on repeat + the song is within the first second, scrobble it if so
+				if isRepeat(status) && status.Elapsed < 1 {
 					currentlyWatchedTrack = trackInfo.Title // set current track to new track
 					makeScrobble(trackInfo, timestamp)
-					// check if user has the track on repeat + the song is within the first second, scrobble it if so
-				} else if isRepeat(status) && status.Elapsed < 1 {
+					// run scrobble
+				} else if percent >= config.ScrobbleThreshold && trackInfo.Title != currentlyWatchedTrack {
 					currentlyWatchedTrack = trackInfo.Title // set current track to new track
 					makeScrobble(trackInfo, timestamp)
 				}

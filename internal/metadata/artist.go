@@ -8,6 +8,7 @@ import (
 	"github.com/violetcircus/viviscrobbler/internal/configreader"
 	"regexp"
 	"strings"
+	// "time"
 )
 
 type Result struct {
@@ -39,11 +40,12 @@ func CheckMetadata(artist string) string {
 	artists := splitArtists(artist)
 	for i := range artists {
 		name := strings.Join(artists[:len(artists)-i], "")
-		fmt.Println("name:", name)
+		// time.Sleep(2 * time.Second) // avoid spamming musicbrainz's api
 		if SendQuery(name) != "Not an artist" {
 			return strings.TrimSpace(name)
 		}
 	}
+	fmt.Println("uh oh no artist found")
 	return separateArtists(artist)
 }
 

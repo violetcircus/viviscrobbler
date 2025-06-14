@@ -103,7 +103,7 @@ func UpdateNowPlaying(trackInfo metadata.TrackInfo) {
 	// prepare the parameters for signature signing
 	parameters := map[string]string{
 		"api_key": apiKey,
-		"artist":  metadata.CheckMetadata(trackInfo.Artist),
+		"artist":  metadata.GetArtist(trackInfo.Artist),
 		"track":   trackInfo.Title,
 		"album":   trackInfo.Album,
 		"method":  "track.updateNowPlaying",

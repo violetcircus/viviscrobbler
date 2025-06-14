@@ -152,37 +152,3 @@ func GetStatus(reader *bufio.Reader) Status {
 	}
 	return s
 }
-
-// func mapOutput(reader *bufio.Reader) map[string]string {
-// 	line, err := reader.ReadString('\n')
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-//
-// 	// print the status
-// 	fmt.Println("Server:", line)
-//
-// 	// create track info map
-// 	trackInfo := make(map[string]string)
-// 	// loop over song info
-// 	for {
-// 		line, err := reader.ReadString('\n')
-// 		if err != nil {
-// 			log.Fatal(err)
-// 		}
-// 		line = strings.TrimSpace(line)
-// 		// check if response finished, stop if it has
-// 		if line == "OK" || strings.HasPrefix(line, "ACK") {
-// 			fmt.Println("Response:", line)
-// 			break
-// 		}
-// 		// output results to terminal
-// 		// fmt.Println(line)
-// 		// put results in the map
-// 		key, value, found := strings.Cut(line, ":")
-// 		if found {
-// 			trackInfo[strings.TrimSpace(key)] = strings.TrimSpace(value)
-// 		}
-// 	}
-// 	return trackInfo
-// }
