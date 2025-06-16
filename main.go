@@ -18,11 +18,13 @@ import (
 
 func main() {
 	log.SetFlags(0)
-	setup.Setup() // call setup function (to do)
+	setup.Setup()
+	fmt.Println("hi")
 
 	args := os.Args
 	handleArgs(args)
 
+	// start the other thread that reads the log file and scrobbles the entries in it
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go scrobbler.ReadScrobble(&wg)

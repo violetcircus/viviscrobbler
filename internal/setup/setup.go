@@ -38,7 +38,8 @@ func Setup() {
 
 // create the files in .config needed by the program if they don't exist
 func createConfig() {
-	files := []string{"config.toml", ".lastfm_session", "logFile.tsv"}
+	files := []string{"config.toml", ".lastfm_session", "logFile.tsv", "mapFile.tsv"}
+	fmt.Println("hi")
 
 	for _, file := range files {
 		if _, err := os.Stat(configreader.GetConfigDir() + file); err == nil {
@@ -182,6 +183,7 @@ func writeSession(session Session) {
 	w.Flush()
 }
 
+// writes the default config
 func WriteConfig() {
 	config := configreader.Config{
 		SingleArtist:      true,

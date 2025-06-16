@@ -34,14 +34,26 @@ func GetArtist(artist string) string {
 	}
 }
 
+// okay so like.
+// function to check metadata string against artist map: will be put in CheckMetadata, i guess
+// function to write new artist to artist map: also in CheckMetadata
+
 // parse result for artist info
 func CheckMetadata(artist string) string {
+	// check previously evaluated artists (mapFile.tsv) for a cleaned artist for the received metadata string
+	fromFile := checkMapFile(artist)
+	if fromFile != "" {
+		// don't need to query the api if we already did previously
+		return fromFile
+	}
+
 	// split artist up across each separator then loop through them, popping the end off each time until a valid artist is found.
 	artists := splitArtists(artist)
 	for i := range artists {
 		name := strings.Join(artists[:len(artists)-i], "")
 		// time.Sleep(2 * time.Second) // avoid spamming musicbrainz's api
 		if SendQuery(name) != "Not an artist" {
+			writeMapFile(artist, name)
 			return strings.TrimSpace(name)
 		}
 	}
