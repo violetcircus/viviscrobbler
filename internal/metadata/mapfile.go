@@ -7,12 +7,6 @@ import (
 	"os"
 )
 
-// artists stored in the map
-type artistEntry struct {
-	oldString string
-	cleaned   string
-}
-
 // check map file for cleaned artist name for received metadata string
 func checkMapFile(artist string) string {
 	f := configreader.GetConfigDir() + "mapFile.tsv"
@@ -45,10 +39,6 @@ func checkMapFile(artist string) string {
 
 // write cleaned artist name to map file
 func writeMapFile(artist string, cleanedArtist string) {
-	s := artistEntry{
-		oldString: artist,
-		cleaned:   cleanedArtist,
-	}
 	f := configreader.GetConfigDir() + "mapFile.tsv"
 	mapFile, err := os.OpenFile(f, os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
@@ -59,7 +49,7 @@ func writeMapFile(artist string, cleanedArtist string) {
 	w := csv.NewWriter(mapFile)
 	w.Comma = '\t'
 
-	row := []string{s.oldString, s.cleaned}
+	row := []string{artist, cleanedArtist}
 	if err := w.Write(row); err != nil {
 		log.Println("error writing artist to file")
 	}
