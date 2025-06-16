@@ -8,7 +8,23 @@ two main reasons.
     a. I'm a recovering Spotify user, and the majority of my last.fm history is in the format spotify provides: only the first artist in is scrobbled when multiple are present on a song, and the rest are discarded. As far as I could tell from a cursory look, no other scrobbler for MPD has this behaviour - this presented a problem, as I wanted to have backwards compatibility with my old listens.
 
     a. I recently got an ipod 5 and put rockbox on it, and wanted the listening history from that to be backwards compatible too. 
-1. i wanted to learn go, and figured this would be fun.
+2. i wanted to learn go, and figured this would be fun.
+
+## how?
+1. The scrobbler connects to MPD, then watches it for changes in the player subsystem.
+2. If a new track starts, request the song info and player status from MPD once a second, and get the timestamp for when the song started.
+3. Once the scrobble threshold (default 50%) has been reached, write the necessary information to create a scrobble to logFile.tsv
+4. logFile.tsv is used as a queue, ensuring that even if the connection is dropped the scrobbles will be sent in the correct order.
+5. The background thread checks the file for changes constantly, looping over any entries to send them to Last.FM.
+6. By default, the artist name reported by MPD is adjusted to only contain the first artist if any features are present, using Musicbrainz or regex to check. The user can adjust this.
+7. The MusicBrainz check works as follows: The artist string received from MPD is split along both "separators" - e.g., ",", "and", "Feat." etc. - and a slice - array in languages other than Go - is created containing the parts of the name and the separators in order. For example, "Tyler, the Creator Feat. Frank Ocean" would become ["Tyler", ",", "The Creator", "Feat.", "Frank Ocean"]. 
+8. The program then concatenates these together and checks it against MusicBrainz's artist search API. If no artist matches this string, it removes the one at the end and checks that again, e.g., the previous example's second iteration would be "Tyler, The Creator Feat.". It repeats this process until it finds an exact match on Musicbrainz (though it is case-insensitive, and will return the version stored on MusicBrainz). This is a more sure-fire way of determining the first artist in a metadata segment than simple regex, as regex can easily be stumped by the presence of these separator characters within artist names - like, for example, "Tyler, The Creator" or "Earth, Wind & Fire". It is also better than simply using the Album Artist metadata field, as that is not always present and can often be misleading in the case of albums with songs created by multiple people, e.g. Trash Island by Drain Gang, or the OF Tape.
+9. The resulting separated artist name is stored in mapFile.tsv along with the original string, removing the need for extra musicbrainz queries and allowing the user to customise the artist adjustments by simply editing the file.
+10. The completed scrobble is sent to Last.FM.
+
+To scrobble from a scrobble log created by Rockbox, you simply run the program with a file path as the argument. It will handle the artist metadata provided by the file in exactly the same way as it does the metadata received from MPD.
+
+Tab-separated values files are used because tabs are the most reliable separator to use with data that can contain literally any punctuation character.
 ## installation:
 either use the compiled release files or clone the repo and build it yourself - or, alternatively, use go install.
 ### dependencies:
