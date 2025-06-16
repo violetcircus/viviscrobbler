@@ -27,6 +27,11 @@ you can also install this with `go install github.com/violetcircus/viviscrobbler
 - `viviscrobbler`on its own will initiate the scrobbler.
 - `viviscrobbler {PATH}` will load the file at the path and attempt to parse it for scrobbles - this is intended to be used with Rockbox's lastfm plugin's specific output format, so anything that doesn't conform to that format will not work!
 - `viviscrobbler config` will regenerate the config file.
+### files in the config folder:
+- `config.toml` config file
+- `logFile.tsv` tab-separated values file used as a queue for scrobbling. this ensures listens will be scrobbled in appropriate order even when offline
+- `mapFile.tsv` tab-separated values file that stores the result of the program's artist-trimming along with the original string. You can edit this if you want to directly tell the program what to replace a certain artist metadata field with when scrobbling.
+- `.lastfm_session` stores your lastfm session key generated after authorising the app along with your username for authentication purposes.
 ### systemd
 downloading this application through any of these methods besides go install will provide a systemd service you can use which is pre-configured to only run after mpd starts.
 ### setup
@@ -47,5 +52,4 @@ IMPORTANT NOTE: If you build from source, you will need to provide your own API 
 - This currently only works with Last.FM, because that's what I use. If you want to use another service I'm sure it wouldn't be hard to fork this and rework some of the api queries to point elsewhere.
 - the scrobbler gets the first artist listed in metadata by splitting the artist string up across several separators and creating a slice consisting of each section - including the separators - then iterates over that slice, concatenating it together, checking that against musicbrainz's database, then dropping the end off and doing it again until it either finds an artist or reaches the beginning of the string.
 ### known issues:
-- for some reason, it keeps cutting artist names down further than it should - this seems to especially be an issue with Tyler, the Creator, who's been a thorn in the side of this program's development from the outset. Someone please tell artists to stop putting delimiters in their stage names.
-- okay, I figured this out: musicbrainz returns a 503 status code sometimes. I figured this might be due to rate-limiting, but adding a time.sleep doesn't seem to solve the problem - not really sure what else to do about it. Worst-case I rethink the way I check artist metadata against it
+- ~~for some reason, it keeps cutting artist names down further than it should - this seems to especially be an issue with Tyler, the Creator, who's been a thorn in the side of this program's development from the outset. Someone please tell artists to stop putting delimiters in their stage names.~~ solved this by reducing amount of spam to the musicbrainz api during artist checking

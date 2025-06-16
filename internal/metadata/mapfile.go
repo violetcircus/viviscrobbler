@@ -28,6 +28,7 @@ func checkMapFile(artist string) string {
 	if err != nil {
 		log.Fatal(err)
 	}
+	// there's probably a less expensive way to do this - i wonder if there's a way to have ReadAll produce a map instead of a slice? idk
 	if len(entries) > 0 {
 		for _, entry := range entries {
 			if entry[0] == artist {
