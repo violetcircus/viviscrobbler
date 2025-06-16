@@ -1,4 +1,5 @@
 # viviscrobbler
+## what?
 a last FM scrobbler written in Go, for MPD and Rockbox.
 
 ## why?
