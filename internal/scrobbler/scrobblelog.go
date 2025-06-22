@@ -164,8 +164,7 @@ func ReadRockboxLog(path string) {
 					Title:     scrobble[2],
 					Timestamp: scrobble[6],
 				}
-				fmt.Println("hi")
-				fmt.Println("scrobble:", s)
+				log.Println("scrobble:", s)
 				if !UploadScrobbles(s) {
 					// if scrobble upload fails, add it to the main log file to be handled later then skip it
 					WriteScrobble(s)

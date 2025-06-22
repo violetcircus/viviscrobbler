@@ -7,6 +7,8 @@ import (
 )
 
 type Config struct {
+	ServerAddress     string
+	ServerPort        string
 	SingleArtist      bool
 	ApiCheck          bool
 	Regex             string

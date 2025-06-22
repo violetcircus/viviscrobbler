@@ -19,7 +19,6 @@ import (
 func main() {
 	log.SetFlags(0)
 	setup.Setup()
-	fmt.Println("hi")
 
 	args := os.Args
 	handleArgs(args)
@@ -35,7 +34,7 @@ func main() {
 	fmt.Println("viviscrobbler!")
 
 	// connect to mpd
-	conn, err := net.Dial("tcp", "localhost:6600")
+	conn, err := net.Dial("tcp", config.ServerAddress+":"+config.ServerPort)
 	if err != nil {
 		log.Fatal(err)
 	}
