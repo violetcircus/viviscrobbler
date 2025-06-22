@@ -54,6 +54,8 @@ downloading this application through any of these methods besides go install wil
 ### setup
 IMPORTANT NOTE: If you build from source, you will need to provide your own API key and secret in the config file - which can be acquired from last.fm [here](https://www.last.fm/api/account/create). the release binaries, however, contain my api key and secret. 
 #### Config options:
+- serveraddress: string. address of the mpd server to connect to, defaults to localhost.
+- serverport: string, port of the mpd server to connect to. defaults to 6600
 - singleartist: bool. if true, will attempt to parse the artist section of a song's metadata for the first artist and provide only that to last.fm
 - apicheck: bool. if true, will use musicbrainz's api to find the artist name rather than pure regex. if false, will use pure regex
 - regex: string. if not blank, will be used as the regex string for separating artists (when api check is false)
