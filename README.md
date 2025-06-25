@@ -42,7 +42,7 @@ this will create the viviscrobbler executable file, which you should move to you
 you can also install this with `go install github.com/violetcircus/viviscrobbler`.
 ## usage:
 - `viviscrobbler`on its own will initiate the scrobbler.
-- `viviscrobbler {PATH}` will load the file at the path and attempt to parse it for scrobbles - this is intended to be used with Rockbox's lastfm plugin's specific output format, so anything that doesn't conform to that format will not work!
+- `viviscrobbler {PATH}` will load the file at the path and attempt to parse it for scrobbles - this is intended to be used with Rockbox's lastfm plugin's specific output format, so anything that doesn't conform to that format will not work! ALSO IMPORTANT: ENSURE YOUR DATE AND TIME IS SET CORRECTLY ON YOUR DEVICE WITH ROCKBOX. LAST.FM REQUIRES CORRECT TIMESTAMPS
 - `viviscrobbler config` will regenerate the config file.
 ### files in the config folder:
 - `config.toml` config file
