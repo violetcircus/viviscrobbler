@@ -49,8 +49,9 @@ func main() {
 	for {
 		// tell mpd to idle and watch for changes in player
 		fmt.Fprintln(conn, "idle player")
-		// read mpd idle command output until it something in the player changes
+		// read mpd idle command output until something in the player changes
 		for {
+			time.Sleep(time.Second / 2) // poll every half second rather than literally as fast as your cpu can possibly run the loop
 			line, err := reader.ReadString('\n')
 			if err != nil {
 				log.Println("yurp we died")
@@ -106,7 +107,7 @@ func main() {
 			case "pause": // when paused, just go back to the start of the loop
 				// loop again until something else happens
 			case "stop": // when stopped, exit this loop
-				elapsed = 0.0 // not strictly necessary but like,
+				elapsed = 0.0 // not strictly necessary but like, just in case
 				break
 			}
 		}
