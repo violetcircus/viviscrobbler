@@ -53,11 +53,11 @@ func main() {
 		// read mpd idle command output until something in the player changes
 		buf := make([]byte, 512) // create reusable buffer to avoid ballooning memory usage since this will loop a lot in the background
 		for {
-			line, err := reader.Read(buf)
+			n, err := reader.Read(buf)
 			if err != nil {
 				log.Fatal("mpd read error:", err)
 			}
-			if bytes.Contains(buf[:line], []byte("changed: player")) {
+			if bytes.Contains(buf[:n], []byte("changed: player")) {
 				break
 			}
 			time.Sleep(time.Second / 2)
