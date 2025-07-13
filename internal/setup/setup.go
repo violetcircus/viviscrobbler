@@ -45,7 +45,7 @@ func createConfig() {
 			continue // skip file if it exists already
 		} else if errors.Is(err, os.ErrNotExist) {
 			// make it if it doesn't
-			os.Mkdir(configreader.GetConfigDir(), 0755)
+			os.Mkdir(configreader.GetConfigDir(), 0777)
 			configFile, err := os.Create(configreader.GetConfigDir() + file)
 			if err != nil {
 				log.Fatal(err)

@@ -26,7 +26,7 @@ type Scrobble struct {
 }
 
 // get session key from session file
-func getSession() string {
+func getSessionKey() string {
 	f, err := os.Open(configreader.GetConfigDir() + ".lastfm_session")
 	if err != nil {
 		log.Fatal(err)
@@ -45,7 +45,7 @@ func getSession() string {
 // a user-provided file from rockbox
 func UploadScrobbles(scrobble LoggedScrobble) bool {
 	apiKey := secret.GetSecrets().ApiKey
-	sk := getSession()
+	sk := getSessionKey()
 
 	// prepare the parameters for signature signing
 	parameters := map[string]string{
@@ -98,7 +98,7 @@ func UploadScrobbles(scrobble LoggedScrobble) bool {
 // whenever the song changes
 func UpdateNowPlaying(trackInfo metadata.TrackInfo) {
 	apiKey := secret.GetSecrets().ApiKey
-	sk := getSession()
+	sk := getSessionKey()
 
 	// prepare the parameters for signature signing
 	parameters := map[string]string{
