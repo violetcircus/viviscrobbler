@@ -2,11 +2,8 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
-	"github.com/violetcircus/viviscrobbler/internal/configreader"
-	"github.com/violetcircus/viviscrobbler/internal/metadata"
-	"github.com/violetcircus/viviscrobbler/internal/scrobbler"
-	"github.com/violetcircus/viviscrobbler/internal/setup"
 	"log"
 	"net"
 	"os"
@@ -14,6 +11,11 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/violetcircus/viviscrobbler/internal/configreader"
+	"github.com/violetcircus/viviscrobbler/internal/metadata"
+	"github.com/violetcircus/viviscrobbler/internal/scrobbler"
+	"github.com/violetcircus/viviscrobbler/internal/setup"
 )
 
 func main() {
@@ -50,17 +52,18 @@ func main() {
 		// tell mpd to idle and watch for changes in player
 		fmt.Fprintln(conn, "idle player")
 		// read mpd idle command output until something in the player changes
+		buf := make([]byte, 1024) // create reusable buffer to avoid ballooning memory usage since this will loop a lot in the background
 		for {
-			time.Sleep(time.Second / 2) // poll every half second rather than literally as fast as your cpu can possibly run the loop
-			line, err := reader.ReadString('\n')
+			n, err := reader.Read(buf)
 			if err != nil {
-				log.Println("yurp we died")
-				log.Fatal(err)
+				log.Fatal("mpd read error:", err)
 			}
-			if strings.HasPrefix(line, "changed: player") {
+			if bytes.Contains(buf[:n], []byte("changed: player")) {
 				break
 			}
+			time.Sleep(time.Second / 2)
 		}
+
 		// go back to idling after getting status/trackinfo
 		// fmt.Fprintln(conn, "idle player")
 
