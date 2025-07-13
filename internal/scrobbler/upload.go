@@ -37,6 +37,9 @@ func getSessionKey() string {
 	if err != nil {
 		log.Fatal(err)
 	}
+	if len(data[0]) == 0 {
+		log.Println("Your session key file is empty! Delete it at .config/vvscrobbler/.lastfm_session and viviscrobbler will prompt you to generate a new one on the next launch.")
+	}
 	return data[0][1]
 }
 
