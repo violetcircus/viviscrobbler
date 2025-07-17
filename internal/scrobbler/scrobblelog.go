@@ -46,16 +46,18 @@ func ReadScrobble(wg *sync.WaitGroup) LoggedScrobble {
 	defer wg.Done()
 	f := configreader.GetConfigDir() + "logFile.tsv"
 
+	logFile, err := os.OpenFile(f, os.O_RDWR, os.ModeAppend)
+	defer logFile.Close()
+
+	r := csv.NewReader(logFile)
+	r.Comma = '\t'
+
 	for {
 		m.Lock()
 		s := LoggedScrobble{}
-		logFile, err := os.OpenFile(f, os.O_RDWR, os.ModeAppend)
-		defer logFile.Close()
 		if err != nil {
 			log.Fatal(err)
 		}
-		r := csv.NewReader(logFile)
-		r.Comma = '\t'
 		scrobbles, err := r.ReadAll()
 		if err != nil {
 			log.Fatal(err)
@@ -77,11 +79,9 @@ func ReadScrobble(wg *sync.WaitGroup) LoggedScrobble {
 			}
 		} else {
 			// if no scrobbles, go to next loop
-			logFile.Close()
 			m.Unlock()
 			continue
 		}
-		logFile.Close()
 		m.Unlock()
 	}
 }
