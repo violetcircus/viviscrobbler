@@ -8,7 +8,6 @@ import (
 	"github.com/violetcircus/viviscrobbler/internal/configreader"
 	"regexp"
 	"strings"
-	// "time"
 )
 
 type Result struct {
