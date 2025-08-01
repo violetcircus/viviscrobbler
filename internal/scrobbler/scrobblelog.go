@@ -27,7 +27,7 @@ func WriteScrobble(scrobble LoggedScrobble) {
 	f := configreader.GetConfigDir() + "logFile.tsv"
 	logFile, err := os.OpenFile(f, os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("error opening log file for write!", err)
 	}
 	defer logFile.Close()
 

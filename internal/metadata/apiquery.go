@@ -35,21 +35,23 @@ func SendQuery(artist string) string {
 	// error handling needs to fall back to other methods of checking metadata later
 	resp, err := http.Get(finalUrl)
 	if err != nil {
-		fmt.Println("whoops. messed up on the get")
-		log.Fatal(err)
+		log.Println("error getting metadata:", err)
+		return "no internet"
 	}
 	defer resp.Body.Close()
 	// convert response into string
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("whoops. messed up on the io.readall")
-		log.Fatal(err)
+		log.Println(err)
+		return "no internet"
 	}
 
 	// convert the body string into ArtistResponse struct
 	var result ArtistResponse
 	if err := json.Unmarshal(body, &result); err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return "Not an artist"
 	}
 	// crop it down to 5 results
 	limit := 5
@@ -57,12 +59,6 @@ func SendQuery(artist string) string {
 	if len(artists) > limit {
 		artists = artists[:limit]
 	}
-	//make that into a json object for debugging
-	// prettyJSON, err := json.MarshalIndent(artists, "", " ")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// log.Print(string(prettyJSON))
 	fmt.Println("musicbrainz status code:", resp.StatusCode)
 
 	// search artists for the artist name

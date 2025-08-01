@@ -107,18 +107,18 @@ func GetToken() string {
 
 	resp, err := http.Get(baseUrl + urlParams)
 	if err != nil {
-		log.Println("get error")
+		log.Println("auth token get error")
 		log.Fatal(err)
 	}
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Println("read error")
+		log.Println("auth token read error")
 		log.Fatal(err)
 	}
 	defer resp.Body.Close()
 	var result TokenResponse
 	if err := json.Unmarshal(body, &result); err != nil {
-		log.Println("json error")
+		log.Println("auth token json error")
 		log.Fatal(err)
 	}
 	token := strings.TrimSpace(result.Token)
@@ -151,18 +151,18 @@ func getSession(token string) {
 
 	resp, err := http.Get(baseUrl + urlParams)
 	if err != nil {
-		log.Println("get error")
+		log.Println("session key get error")
 		log.Fatal(err)
 	}
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Println("read error")
+		log.Println("session key read error")
 		log.Fatal(err)
 	}
 	var result SessionResponse
 	if err := json.Unmarshal(body, &result); err != nil {
-		log.Println("json error")
+		log.Println("session key json error")
 		log.Fatal(err)
 	}
 	writeSession(result.Session)

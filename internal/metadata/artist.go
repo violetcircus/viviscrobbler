@@ -5,9 +5,11 @@ package metadata
 
 import (
 	"fmt"
-	"github.com/violetcircus/viviscrobbler/internal/configreader"
+	"log"
 	"regexp"
 	"strings"
+
+	"github.com/violetcircus/viviscrobbler/internal/configreader"
 )
 
 type Result struct {
@@ -33,14 +35,11 @@ func GetArtist(artist string) string {
 	}
 }
 
-// okay so like.
-// function to check metadata string against artist map: will be put in CheckMetadata, i guess
-// function to write new artist to artist map: also in CheckMetadata
-
 // parse result for artist info
 func CheckMetadata(artist string) string {
 	// check previously evaluated artists (mapFile.tsv) for a cleaned artist for the received metadata string
 	fromFile := checkMapFile(artist)
+	log.Println("mapfile result:", fromFile)
 	if fromFile != "" {
 		// don't need to query the api if we already did previously
 		return fromFile
@@ -51,9 +50,13 @@ func CheckMetadata(artist string) string {
 	for i := range artists {
 		name := strings.Join(artists[:len(artists)-i], "")
 		// time.Sleep(2 * time.Second) // avoid spamming musicbrainz's api
-		if SendQuery(name) != "Not an artist" {
+		result := SendQuery(name)
+		// "Not an artist" essentially serves as a universal error response from SendQuery.
+		if result != "Not an artist" && result != "no internet" {
 			writeMapFile(artist, name)
 			return strings.TrimSpace(name)
+		} else if result == "no internet" {
+			break
 		}
 	}
 	fmt.Println("uh oh no artist found")
@@ -61,15 +64,14 @@ func CheckMetadata(artist string) string {
 }
 
 func splitArtists(input string) []string {
-	// log.Print("splitting artists")
-	// Define a case-insensitive regex pattern for separators
+	// case-insensitive regex pattern for separators
 	re := regexp.MustCompile(`(?i)\s*(,|;|&|feat\.|ft\.|featuring|and|\/)\s*`)
 
-	// Split parts and find separators
+	// split parts and find separators
 	parts := re.Split(input, -1)
 	separators := re.FindAllString(input, -1)
 
-	// Build combined result
+	// build combined result
 	var result []string
 	for i, part := range parts {
 		trimmedPart := strings.TrimSpace(part)
@@ -77,7 +79,7 @@ func splitArtists(input string) []string {
 			result = append(result, trimmedPart)
 		}
 		if i < len(separators) {
-			sep := fmt.Sprintf("%v ", strings.TrimSpace(separators[i])) // capture group for the separator itself
+			sep := fmt.Sprintf("%v", separators[i]) // capture group for the separator itself
 			if sep != "" {
 				result = append(result, sep)
 			}

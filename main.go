@@ -37,7 +37,7 @@ func main() {
 	// connect to mpd
 	conn, err := net.Dial("tcp", config.ServerAddress+":"+config.ServerPort)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("failed to connect to mpd!", err)
 	}
 	defer conn.Close()
 	reader := bufio.NewReader(conn)
@@ -55,7 +55,18 @@ func main() {
 		for {
 			n, err := reader.Read(buf)
 			if err != nil {
-				log.Fatal("mpd read error:", err)
+				if err.Error() == "EOF" {
+					log.Println("mpd read error:", err)
+					// reconnect to mpd in case of timeout
+					conn, err = net.Dial("tcp", config.ServerAddress+":"+config.ServerPort)
+					if err != nil {
+						log.Fatal("failed to reconnect to mpd!", err)
+					} else {
+						continue
+					}
+				} else {
+					log.Fatal("mpd read error:", err)
+				}
 			}
 			if bytes.Contains(buf[:n], []byte("changed: player")) {
 				break
@@ -74,17 +85,25 @@ func main() {
 			// get current song from mpd
 			fmt.Fprintf(conn, "currentsong\n")
 			trackInfo := metadata.GetSong(reader)
+			if trackInfo.Title == "EOF" {
+				break
+			}
 
 			// get current mpd status
 			fmt.Fprintf(conn, "status\n")
 			status := metadata.GetStatus(reader)
+			if status.State == "EOF" {
+				break
+			}
 
 			fmt.Println("state:", status.State)
 			switch status.State {
 			case "play": // when in play state, calculate percent through song
 				if trackInfo.Title != currentlyWatchedTrack {
 					fmt.Println("current track:", currentlyWatchedTrack)
-					scrobbler.UpdateNowPlaying(trackInfo)
+					// update now playing in a new thread to avoid hanging the program when internet is unavailable
+					wg.Add(1)
+					go scrobbler.UpdateNowPlaying(trackInfo, &wg)
 				}
 				if isRepeat(status) {
 					timestamp = strconv.FormatInt(time.Now().Unix(), 10)
@@ -133,7 +152,7 @@ func makeScrobble(trackInfo metadata.TrackInfo, timestamp string) {
 		Album:     trackInfo.Album,
 		Timestamp: timestamp,
 	}
-	log.Println("Cleaned artist:", metadata.GetArtist(trackInfo.Artist))
+	// log.Println("Cleaned artist:", metadata.GetArtist(trackInfo.Artist))
 	scrobbler.WriteScrobble(s)
 	// fmt.Println(scrobbler.ReadScrobble())
 }
@@ -163,4 +182,12 @@ func handleArgs(args []string) {
 			}
 		}
 	}
+}
+
+func connect(config configreader.Config) net.Conn {
+	conn, err := net.Dial("tcp", config.ServerAddress+":"+config.ServerPort)
+	if err != nil {
+		log.Fatal("failed to connect to mpd!", err)
+	}
+	return conn
 }

@@ -12,7 +12,8 @@ func checkMapFile(artist string) string {
 	f := configreader.GetConfigDir() + "mapFile.tsv"
 	mapFile, err := os.OpenFile(f, os.O_RDWR, os.ModeAppend)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return ""
 	}
 	defer mapFile.Close()
 
@@ -20,7 +21,8 @@ func checkMapFile(artist string) string {
 	r.Comma = '\t'
 	entries, err := r.ReadAll()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return ""
 	}
 	// there's probably a less expensive way to do this - i wonder if there's a way to have ReadAll produce a map instead of a slice? idk
 	if len(entries) > 0 {
@@ -42,7 +44,7 @@ func writeMapFile(artist string, cleanedArtist string) {
 	f := configreader.GetConfigDir() + "mapFile.tsv"
 	mapFile, err := os.OpenFile(f, os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("error opening map file", err)
 	}
 	defer mapFile.Close()
 

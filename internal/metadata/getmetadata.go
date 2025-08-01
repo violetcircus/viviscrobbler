@@ -35,29 +35,26 @@ func GetSong(reader *bufio.Reader) TrackInfo {
 	s := TrackInfo{}
 	line, err := reader.ReadString('\n')
 	if err != nil {
-		log.Fatal(err)
+		if err.Error() == "EOF" {
+			log.Println("error reading track info!", err)
+			return TrackInfo{Title: "EOF"}
+		} else {
+			log.Fatal("error reading track info!", err)
+		}
 	}
 
 	//print the status
 	fmt.Println("Server:", line)
 
-	// buf := make([]byte, 1024)
-	// for {
-	// 	line, err := reader.Read(buf)
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	//
-	// 	data := buf[:line]
-	// 	if len(data) >= 2 && (string(data[:2]) == "OK" || (len(data) >= 3 && string(data[:3]) == "ACK")) {
-	// 		fmt.Println("song response:", line)
-	// 		break
-	// 	}
-	// }
 	for {
 		line, err := reader.ReadString('\n')
 		if err != nil {
-			log.Fatal(err)
+			if err.Error() == "EOF" {
+				log.Println("error getting track from MPD!", err)
+				return TrackInfo{Title: "EOF"}
+			} else {
+				log.Fatal("error getting track from MPD!", err)
+			}
 		}
 		line = strings.TrimSpace(line) // sanitise lines
 		// break loop when track info is complete or an error is given
@@ -88,7 +85,12 @@ func GetStatus(reader *bufio.Reader) Status {
 	for {
 		line, err := reader.ReadString('\n')
 		if err != nil {
-			log.Fatal(err)
+			if err.Error() == "EOF" {
+				log.Println("error reading MPD status!", err)
+				return Status{State: "EOF"}
+			} else {
+				log.Fatal("error reading MPD status!", err)
+			}
 		}
 		line = strings.TrimSpace(line) // sanitise lines
 		// break loop when status is retrieved or error is given

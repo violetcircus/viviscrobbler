@@ -12,6 +12,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"sync"
 )
 
 // scrobble to be uploaded to lastfm
@@ -71,20 +72,23 @@ func UploadScrobbles(scrobble LoggedScrobble) bool {
 	for a, b := range parameters {
 		path, err := url.PathUnescape(b)
 		if err != nil {
-			log.Fatal(err)
+			log.Println("failed to escape post body", err)
+		} else {
+			postBody.Set(a, path)
 		}
-		postBody.Set(a, path)
 	}
 
 	// send post request to scrobble api
 	resp, err := http.Post(baseUrl, "application/x-www-form-urlencoded", strings.NewReader(postBody.Encode()))
 	if err != nil {
-		log.Fatal(err)
+		log.Println("error communicating with last fm!")
+		return false
 	}
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Println("error reading last.fm response body!", err)
+		return false
 	}
 	log.Printf("scrobble response: %s", body)
 
@@ -99,7 +103,8 @@ func UploadScrobbles(scrobble LoggedScrobble) bool {
 
 // update last.fm's Now Playing api with current track - independent of scrobbling, so is run from main loop
 // whenever the song changes
-func UpdateNowPlaying(trackInfo metadata.TrackInfo) {
+func UpdateNowPlaying(trackInfo metadata.TrackInfo, wg *sync.WaitGroup) {
+	defer wg.Done()
 	apiKey := secret.GetSecrets().ApiKey
 	sk := getSessionKey()
 
@@ -123,21 +128,18 @@ func UpdateNowPlaying(trackInfo metadata.TrackInfo) {
 	for a, b := range parameters {
 		path, err := url.PathUnescape(b)
 		if err != nil {
-			log.Fatal(err)
+			log.Println("failed to escape characters for post request!")
+		} else {
+			postBody.Set(a, path)
 		}
-		postBody.Set(a, path)
 	}
 
 	// send post request to now playing api
 	resp, err := http.Post(baseUrl, "application/x-www-form-urlencoded", strings.NewReader(postBody.Encode()))
 	if err != nil {
-		log.Fatal(err)
+		log.Println("failed to update now playing!!")
+	} else {
+		defer resp.Body.Close()
+		_ = resp
 	}
-	defer resp.Body.Close()
-	_ = resp
-	// body, err := io.ReadAll(resp.Body)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// fmt.Printf("now playing response: %s", body)
 }
