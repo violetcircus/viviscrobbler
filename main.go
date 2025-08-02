@@ -17,6 +17,23 @@ import (
 	"time"
 )
 
+func connectToMPD(config configreader.Config) (net.Conn, *bufio.Reader) {
+	var conn net.Conn
+	var err error
+	for {
+		log.Printf("Attempting to connect to MPD at %s:%s...", config.ServerAddress, config.ServerPort)
+		conn, err = net.Dial("tcp", config.ServerAddress+":"+config.ServerPort)
+		if err != nil {
+			log.Printf("Failed to connect to MPD: %v. Retrying in 5 seconds...", err)
+			time.Sleep(5 * time.Second) // Wait before retrying
+			continue
+		}
+		log.Println("Successfully connected to MPD.")
+		reader := bufio.NewReader(conn)
+		return conn, reader
+	}
+}
+
 func main() {
 	log.SetFlags(0)
 	// logContainer := setup.Setup()
@@ -35,12 +52,13 @@ func main() {
 	fmt.Println("viviscrobbler!")
 
 	// connect to mpd
-	conn, err := net.Dial("tcp", config.ServerAddress+":"+config.ServerPort)
-	if err != nil {
-		log.Fatal("failed to connect to mpd!", err)
-	}
-	defer conn.Close()
-	reader := bufio.NewReader(conn)
+	// conn, err := net.Dial("tcp", config.ServerAddress+":"+config.ServerPort)
+	// if err != nil {
+	// 	log.Fatal("failed to connect to mpd!", err)
+	// }
+	// defer conn.Close()
+	// reader := bufio.NewReader(conn)
+	conn, reader := connectToMPD(config)
 
 	// set the currently watched track to nothing
 	currentlyWatchedTrack := ""
@@ -55,21 +73,19 @@ func main() {
 		for {
 			n, err := reader.Read(buf)
 			if err != nil {
-				if err.Error() == "EOF" {
+				if err.Error() == "EOF" || strings.Contains(err.Error(), "use of closed network connection") {
 					log.Println("mpd read error:", err)
-					// reconnect to mpd in case of timeout
-					// conn.Close()
-					// conn, err = net.Dial("tcp", config.ServerAddress+":"+config.ServerPort)
-					// fmt.Fprintln(conn, "idle player")
 					log.Println("reconnecting to mpd...")
+					conn.Close()
+					conn, reader := connectToMPD(config)
+					n, err := reader.Read(buf)
+					log.Println(n)
 					if err != nil {
-						log.Fatal("failed to reconnect to mpd!", err)
-						// here is where i planned to handle timeouts but idk how lol
-					} else {
-						continue
+						log.Fatal("fatal mpd read error:", err)
 					}
+					fmt.Fprintln(conn, "idle player")
 				} else {
-					log.Fatal("mpd read error:", err)
+					log.Fatal("fatal mpd read error:", err)
 				}
 			}
 			if bytes.Contains(buf[:n], []byte("changed: player")) {
