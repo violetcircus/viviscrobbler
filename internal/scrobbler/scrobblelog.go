@@ -46,13 +46,11 @@ func ReadScrobble(wg *sync.WaitGroup) LoggedScrobble {
 	defer wg.Done()
 	f := configreader.GetConfigDir() + "logFile.tsv"
 
-	logFile, err := os.OpenFile(f, os.O_RDWR, os.ModeAppend)
-	defer logFile.Close()
-
-	r := csv.NewReader(logFile)
-	r.Comma = '\t'
-
 	for {
+		logFile, err := os.OpenFile(f, os.O_RDWR, os.ModeAppend)
+		defer logFile.Close()
+		r := csv.NewReader(logFile)
+		r.Comma = '\t'
 		m.Lock()
 		s := LoggedScrobble{}
 		if err != nil {
@@ -64,6 +62,7 @@ func ReadScrobble(wg *sync.WaitGroup) LoggedScrobble {
 		}
 		// if there's scrobbles in the file, read the first one
 		if len(scrobbles) > 0 {
+			log.Println("scrobbles!")
 			scrobble := scrobbles[0]
 			artist := metadata.GetArtist(scrobble[0])
 			s = LoggedScrobble{
@@ -74,15 +73,21 @@ func ReadScrobble(wg *sync.WaitGroup) LoggedScrobble {
 			}
 			log.Printf("scrobble: %s", s)
 			// if scrobble successfully uploaded, remove top line from file
-			if UploadScrobbles(s) {
+			if UploadScrobbles(s) == true {
 				popLine(logFile)
+				logFile.Close()
+				m.Unlock()
+				continue
+			} else {
+				logFile.Close()
+				continue
 			}
 		} else {
 			// if no scrobbles, go to next loop
+			logFile.Close()
 			m.Unlock()
 			continue
 		}
-		m.Unlock()
 	}
 }
 

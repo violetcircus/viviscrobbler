@@ -58,9 +58,13 @@ func main() {
 				if err.Error() == "EOF" {
 					log.Println("mpd read error:", err)
 					// reconnect to mpd in case of timeout
-					conn, err = net.Dial("tcp", config.ServerAddress+":"+config.ServerPort)
+					// conn.Close()
+					// conn, err = net.Dial("tcp", config.ServerAddress+":"+config.ServerPort)
+					// fmt.Fprintln(conn, "idle player")
+					log.Println("reconnecting to mpd...")
 					if err != nil {
 						log.Fatal("failed to reconnect to mpd!", err)
+						// here is where i planned to handle timeouts but idk how lol
 					} else {
 						continue
 					}
@@ -73,9 +77,6 @@ func main() {
 			}
 			time.Sleep(time.Second / 2)
 		}
-
-		// go back to idling after getting status/trackinfo
-		// fmt.Fprintln(conn, "idle player")
 
 		// loop checking the state
 		elapsed := 0.0
