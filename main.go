@@ -19,8 +19,8 @@ import (
 
 func main() {
 	log.SetFlags(0)
+	// logContainer := setup.Setup()
 	setup.Setup()
-
 	args := os.Args
 	handleArgs(args)
 

@@ -82,7 +82,6 @@ func UploadScrobbles(scrobble LoggedScrobble) bool {
 	resp, err := http.Post(baseUrl, "application/x-www-form-urlencoded", strings.NewReader(postBody.Encode()))
 	if err != nil {
 		log.Println("error communicating with last fm!")
-		log.Fatal(err)
 		return false
 	}
 	defer resp.Body.Close()

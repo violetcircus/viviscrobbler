@@ -4,12 +4,14 @@ import (
 	"bytes"
 	"encoding/csv"
 	"fmt"
-	"github.com/violetcircus/viviscrobbler/internal/configreader"
-	"github.com/violetcircus/viviscrobbler/internal/metadata"
 	"io"
 	"log"
 	"os"
 	"sync"
+	"time"
+
+	"github.com/violetcircus/viviscrobbler/internal/configreader"
+	"github.com/violetcircus/viviscrobbler/internal/metadata"
 )
 
 type LoggedScrobble struct {
@@ -24,6 +26,7 @@ var m sync.Mutex
 // write scrobble to file
 func WriteScrobble(scrobble LoggedScrobble) {
 	m.Lock()
+	log.Println("hiiii")
 	f := configreader.GetConfigDir() + "logFile.tsv"
 	logFile, err := os.OpenFile(f, os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
@@ -47,12 +50,13 @@ func ReadScrobble(wg *sync.WaitGroup) LoggedScrobble {
 	f := configreader.GetConfigDir() + "logFile.tsv"
 
 	for {
+		m.Lock()
 		logFile, err := os.OpenFile(f, os.O_RDWR, os.ModeAppend)
 		defer logFile.Close()
+
 		r := csv.NewReader(logFile)
 		r.Comma = '\t'
-		m.Lock()
-		s := LoggedScrobble{}
+
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -65,7 +69,7 @@ func ReadScrobble(wg *sync.WaitGroup) LoggedScrobble {
 			log.Println("scrobbles!")
 			scrobble := scrobbles[0]
 			artist := metadata.GetArtist(scrobble[0])
-			s = LoggedScrobble{
+			s := LoggedScrobble{
 				Artist:    artist,
 				Album:     scrobble[1],
 				Title:     scrobble[2],
@@ -79,12 +83,16 @@ func ReadScrobble(wg *sync.WaitGroup) LoggedScrobble {
 				m.Unlock()
 				continue
 			} else {
-				logFile.Close()
+				// logFile.Close()
+				log.Println("scrobble upload failed!")
+				time.Sleep(10 * time.Second)
+				m.Unlock()
 				continue
 			}
 		} else {
 			// if no scrobbles, go to next loop
-			logFile.Close()
+			log.Println("SCROBBLELOGGER: no scrobbles, waiting 10 seconds!")
+			time.Sleep(10 * time.Second)
 			m.Unlock()
 			continue
 		}

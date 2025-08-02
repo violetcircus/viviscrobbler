@@ -36,6 +36,18 @@ func Setup() {
 	createConfig()
 }
 
+// func openLog() LogContainer {
+// 	f := configreader.GetConfigDir() + "logFile.tsv"
+// 	logFile, err := os.OpenFile(f, os.O_APPEND|os.O_WRONLY, 0644)
+// 	if err != nil {
+// 		log.Fatal("error opening log file for write!", err)
+// 	}
+// 	defer logFile.Close()
+// 	return LogContainer{
+// 		file: logFile,
+// 	}
+// }
+
 // create the files in .config needed by the program if they don't exist
 func createConfig() {
 	files := []string{"config.toml", ".lastfm_session", "logFile.tsv", "mapFile.tsv"}
