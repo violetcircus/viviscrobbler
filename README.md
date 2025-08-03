@@ -62,15 +62,15 @@ IMPORTANT NOTE: If you build from source, you will need to provide your own API 
 - scrobblethreshold: what percentage of a song's duration needs to be listened to before it'll be sent to last.fm as a scrobble
 - apikey: user API key
 - secret: user API secret
-### contributing:
+## contributing:
 - Not sure how active my maintaining of this will be, but I'll try to keep up with PRs. No promises on issues, though.
 - The comments may not be exhaustive and I haven't written a single test as of yet, so it might be a bit annoying to parse my source code. This is also my first ever go project, so it's likely that it's very flawed.
 - if you have suggestions, please create an issue.
-### other information:
+## other information:
 - Thanks to [YAMS](https://github.com/Berulacks/yams/) for being the main inspiration behind this project - their code was a great help while I was making this, and I directly lifted their systemd service, so go give them a star if you like this.
 - This currently only works with Last.FM, because that's what I use. If you want to use another service I'm sure it wouldn't be hard to fork this and rework some of the api queries to point elsewhere.
 - the scrobbler gets the first artist listed in metadata by splitting the artist string up across several separators and creating a slice consisting of each section - including the separators - then iterates over that slice, concatenating it together, checking that against musicbrainz's database, then dropping the end off and doing it again until it either finds an artist or reaches the beginning of the string.
-### known issues (newest at the top):
+## known issues (newest at the top):
 - The concurrency doesn't actually work correctly w/ the scrobble uploader - it keeps causing the main loop to hang during the upload, but not during its read loop, oddly.
 - when the scrobbler times out it has to reconnect itself twice? for some reason? before it works again. Genuinely have no idea what that's about, but it doesn't impact usage very much, I suppose, given timeouts generally only happen after the queue ends and reconnects don't take very long. It took me a couple of days to even make it reconnect successfully in the first place, so I'm sort of running out of steam to fix this one.
 - ~~this uses an insane amount of memory. lmao. it needs a big refactor. like my whole control flow needs redoing~~ solved! the problem was in the uploading goroutine. Control flow redo may still come eventually, I kind of hate the way this program is structured in retrospect. Too many loops.
