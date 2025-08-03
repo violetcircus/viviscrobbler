@@ -139,6 +139,7 @@ func UpdateNowPlaying(trackInfo metadata.TrackInfo, wg *sync.WaitGroup) {
 	if err != nil {
 		log.Println("failed to update now playing!!")
 	} else {
+		log.Println("successfully updated now playing!!")
 		defer resp.Body.Close()
 		_ = resp
 	}

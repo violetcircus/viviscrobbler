@@ -17,20 +17,28 @@ import (
 	"time"
 )
 
-func connectToMPD(config configreader.Config) (net.Conn, *bufio.Reader) {
+type connTainer struct {
+	conn   net.Conn
+	reader *bufio.Reader
+}
+
+func connectToMPD(config configreader.Config) *connTainer {
 	var conn net.Conn
 	var err error
 	for {
-		log.Printf("Attempting to connect to MPD at %s:%s...", config.ServerAddress, config.ServerPort)
+		log.Printf("attempting to connect to mpd at %s:%s...", config.ServerAddress, config.ServerPort)
 		conn, err = net.Dial("tcp", config.ServerAddress+":"+config.ServerPort)
 		if err != nil {
-			log.Printf("Failed to connect to MPD: %v. Retrying in 5 seconds...", err)
+			log.Printf("failed to connect to mpd: %v. Retrying in 5 seconds...", err)
 			time.Sleep(5 * time.Second) // Wait before retrying
 			continue
 		}
-		log.Println("Successfully connected to MPD.")
+		log.Println("successfully connected to mpd.")
 		reader := bufio.NewReader(conn)
-		return conn, reader
+		return &connTainer{
+			conn:   conn,
+			reader: reader,
+		}
 	}
 }
 
@@ -51,15 +59,9 @@ func main() {
 	// say hi
 	fmt.Println("viviscrobbler!")
 
-	// connect to mpd
-	// conn, err := net.Dial("tcp", config.ServerAddress+":"+config.ServerPort)
-	// if err != nil {
-	// 	log.Fatal("failed to connect to mpd!", err)
-	// }
-	// defer conn.Close()
-	// reader := bufio.NewReader(conn)
-	conn, reader := connectToMPD(config)
-
+	// var reader *bufio
+	var container *connTainer
+	container = connectToMPD(config)
 	// set the currently watched track to nothing
 	currentlyWatchedTrack := ""
 	timestamp := "0"
@@ -67,23 +69,21 @@ func main() {
 	// main program loop. communicates with mpd
 	for {
 		// tell mpd to idle and watch for changes in player
-		fmt.Fprintln(conn, "idle player")
-		// read mpd idle command output until something in the player changes
+		log.Println("idling")
+		fmt.Fprintln(container.conn, "idle player")
 		buf := make([]byte, 512) // create reusable buffer to avoid ballooning memory usage since this will loop a lot in the background
 		for {
-			n, err := reader.Read(buf)
+			n, err := container.reader.Read(buf)
+			log.Println(string(buf))
 			if err != nil {
 				if err.Error() == "EOF" || strings.Contains(err.Error(), "use of closed network connection") {
 					log.Println("mpd read error:", err)
 					log.Println("reconnecting to mpd...")
-					conn.Close()
-					conn, reader := connectToMPD(config)
-					n, err := reader.Read(buf)
-					log.Println(n)
-					if err != nil {
-						log.Fatal("fatal mpd read error:", err)
+					if container != nil && container.conn != nil {
+						container.conn.Close()
 					}
-					fmt.Fprintln(conn, "idle player")
+					container = connectToMPD(config)
+					break
 				} else {
 					log.Fatal("fatal mpd read error:", err)
 				}
@@ -93,23 +93,27 @@ func main() {
 			}
 			time.Sleep(time.Second / 2)
 		}
+		log.Println("entering state check loop...")
 
 		// loop checking the state
 		elapsed := 0.0
 		for {
+			log.Println("testtt")
 			time.Sleep(1 * time.Second) // wait one second
 
 			// get current song from mpd
-			fmt.Fprintf(conn, "currentsong\n")
-			trackInfo := metadata.GetSong(reader)
+			fmt.Fprintf(container.conn, "currentsong\n")
+			trackInfo := metadata.GetSong(container.reader)
 			if trackInfo.Title == "EOF" {
+				log.Println("title = eof")
 				break
 			}
 
 			// get current mpd status
-			fmt.Fprintf(conn, "status\n")
-			status := metadata.GetStatus(reader)
+			fmt.Fprintf(container.conn, "status\n")
+			status := metadata.GetStatus(container.reader)
 			if status.State == "EOF" {
+				log.Println("state = eof")
 				break
 			}
 
@@ -144,7 +148,9 @@ func main() {
 				}
 			case "pause": // when paused, just go back to the start of the loop
 				// loop again until something else happens
+				continue
 			case "stop": // when stopped, exit this loop
+				log.Println("stopped!")
 				elapsed = 0.0 // not strictly necessary but like, just in case
 				break
 			}
@@ -199,12 +205,4 @@ func handleArgs(args []string) {
 			}
 		}
 	}
-}
-
-func connect(config configreader.Config) net.Conn {
-	conn, err := net.Dial("tcp", config.ServerAddress+":"+config.ServerPort)
-	if err != nil {
-		log.Fatal("failed to connect to mpd!", err)
-	}
-	return conn
 }
